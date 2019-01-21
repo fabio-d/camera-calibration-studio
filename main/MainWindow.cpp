@@ -26,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(m_ui->actionAddCamera, &QAction::triggered, this, &MainWindow::addCamera);
 	connect(m_ui->actionDelete, &QAction::triggered, this, &MainWindow::deleteItems);
+	connect(m_ui->actionLiveCaptureStart, &QAction::triggered, this, &MainWindow::liveCaptureStart);
+	connect(m_ui->actionLiveCaptureStop, &QAction::triggered, this, &MainWindow::liveCaptureStop);
+	connect(m_ui->actionLiveCaptureStopAll, &QAction::triggered, this, &MainWindow::liveCaptureStopAll);
 	connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 
 	connect(m_ui->processTreeDockWidget, &ProjectTreeDockWidget::selectionChanged, this, &MainWindow::projectTreeSelectionChanged);
@@ -92,7 +95,21 @@ void MainWindow::projectLoaded(common::Project *newProject)
 
 void MainWindow::projectTreeSelectionChanged()
 {
+	// Disconnect old connections
+	for (const QMetaObject::Connection &c : m_updateLiveCaptureControlsConnections)
+		disconnect(c);
+	m_updateLiveCaptureControlsConnections.clear();
+
 	m_ui->actionDelete->setEnabled(m_ui->processTreeDockWidget->selectedItems().cameras.isEmpty() == false);
+
+	// Create new connections
+	for (common::Camera *c : m_ui->processTreeDockWidget->selectedItems().cameras)
+	{
+		m_updateLiveCaptureControlsConnections <<
+			connect(c, &common::Camera::liveCaptureChanged, this, &MainWindow::updateLiveCaptureControls);
+	}
+
+	updateLiveCaptureControls();
 }
 
 void MainWindow::projectTreeCurrentItemChanged()
@@ -102,6 +119,59 @@ void MainWindow::projectTreeCurrentItemChanged()
 	m_ui->calibrationDataDockWidget->showSensor(it.sensor);
 
 	qCritical() << it.type << it.camera << it.sensor << it.imageType;
+}
+
+void MainWindow::updateLiveCaptureControls()
+{
+	// Check selected cameras
+	bool haveSelectedCamerasThatCanStartLiveCapture = false;
+	bool haveSelectedCamerasThatCanStopLiveCapture = false;
+	for (common::Camera *c : m_ui->processTreeDockWidget->selectedItems().cameras)
+	{
+		if (c->liveCapture() != nullptr)
+			haveSelectedCamerasThatCanStopLiveCapture = true;
+		else if (c->supportsLiveCapture())
+			haveSelectedCamerasThatCanStartLiveCapture = true;
+	}
+
+	// Check all cameras
+	bool haveCamerasWithRunningLiveCapture = false;
+	if (m_currentProject != nullptr)
+	{
+		for (common::Camera *c : m_currentProject->cameras())
+		{
+			if (c->liveCapture() != nullptr)
+				haveCamerasWithRunningLiveCapture = true;
+		}
+	}
+
+	m_ui->actionLiveCaptureStart->setEnabled(haveSelectedCamerasThatCanStartLiveCapture);
+	m_ui->actionLiveCaptureStop->setEnabled(haveSelectedCamerasThatCanStopLiveCapture);
+	m_ui->actionLiveCaptureStopAll->setEnabled(haveCamerasWithRunningLiveCapture);
+	m_ui->actionLiveCaptureShoot->setEnabled(haveCamerasWithRunningLiveCapture);
+}
+
+void MainWindow::liveCaptureStart()
+{
+	for (common::Camera *c : m_ui->processTreeDockWidget->selectedItems().cameras)
+	{
+		if (c->supportsLiveCapture())
+			c->startLiveCapture();
+	}
+}
+
+void MainWindow::liveCaptureStop()
+{
+	for (common::Camera *c : m_ui->processTreeDockWidget->selectedItems().cameras)
+		c->stopLiveCapture();
+}
+
+void MainWindow::liveCaptureStopAll()
+{
+	for (common::Camera *c : m_currentProject->cameras())
+		c->stopLiveCapture();
+
+	updateLiveCaptureControls();
 }
 
 void MainWindow::addCamera()

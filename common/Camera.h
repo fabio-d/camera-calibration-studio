@@ -7,6 +7,8 @@
 namespace ccs::common
 {
 
+class LiveCapture;
+
 struct CameraStaticInfo
 {
 	QString pluginId;
@@ -28,13 +30,25 @@ class Camera : public QObject
 
 		CameraStaticInfo staticInfo() const;
 
+		bool supportsLiveCapture() const;
+		bool startLiveCapture();
+		void stopLiveCapture();
+		LiveCapture *liveCapture() const; // nullptr if not running
+
+	signals:
+		void liveCaptureChanged();
+
 	private:
 		Camera(SqliteDatabase *db, int cameraId);
+
+		void liveCaptureDestroyed();
 
 		SqliteDatabase *m_db;
 		int m_cameraId;
 		QString m_name;
 		QList<Sensor*> m_sensors;
+
+		LiveCapture *m_liveCapture;
 
 		// CameraStaticInfo
 		QString m_pluginId;

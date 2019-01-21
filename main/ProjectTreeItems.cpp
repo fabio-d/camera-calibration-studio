@@ -61,7 +61,8 @@ CameraItem::CameraItem(common::Camera *camera)
 : BaseContentsItem(camera->name())
 , m_camera(camera)
 {
-	setIcon(0, QIcon::fromTheme("camera-web"));
+	connect(m_camera, &common::Camera::liveCaptureChanged, this, &CameraItem::updateIcon);
+	updateIcon();
 
 	addChild(new ImageItem(camera, "IMG0001"));
 	addChild(new ImageItem(camera, "IMG0002"));
@@ -79,6 +80,14 @@ void CameraItem::fillCurrentItem(ProjectTreeDockWidget::CurrentItem *target) con
 {
 	target->type = ProjectTreeDockWidget::CurrentItem::Camera;
 	target->camera = m_camera;
+}
+
+void CameraItem::updateIcon()
+{
+	if (m_camera->liveCapture() != nullptr)
+		setIcon(0, QIcon::fromTheme("media-playback-start"));
+	else
+		setIcon(0, QIcon::fromTheme("camera-web"));
 }
 
 ImageItem::ImageItem(common::Camera *camera, const QString &text)

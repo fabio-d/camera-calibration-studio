@@ -6,6 +6,7 @@ link_libraries(${V4L2_LIBRARIES})
 add_library(ccscamera_V4L2 SHARED
 	AddCameraWidget.cpp
 	CameraPlugin.cpp
+	LiveCapture.cpp
 )
 
 target_link_libraries(ccscamera_V4L2 ccscommon)

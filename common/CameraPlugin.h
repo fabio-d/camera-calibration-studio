@@ -8,6 +8,7 @@ namespace ccs::common
 {
 
 class AddCameraWidget;
+class LiveCapture;
 
 struct CameraPluginMetadata
 {
@@ -25,6 +26,9 @@ class CameraPlugin
 		virtual ~CameraPlugin();
 
 		virtual AddCameraWidget *createAddCameraWidget(QWidget *parent) const = 0;
+
+		virtual bool haveLiveCaptureSupport() const = 0;
+		virtual LiveCapture *startLiveCapture(const QJsonObject &pluginData) const = 0;
 };
 
 }

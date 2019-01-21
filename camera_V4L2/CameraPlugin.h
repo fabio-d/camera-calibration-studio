@@ -1,6 +1,7 @@
 #pragma once
 
 #include "camera_V4L2/AddCameraWidget.h"
+#include "camera_V4L2/LiveCapture.h"
 
 #include "common/CameraPlugin.h"
 
@@ -15,6 +16,9 @@ class CameraPlugin : public QObject, public common::CameraPlugin
 
 	public:
 		AddCameraWidget *createAddCameraWidget(QWidget *parent) const override;
+
+		bool haveLiveCaptureSupport() const override;
+		LiveCapture *startLiveCapture(const QJsonObject &pluginData) const override;
 };
 
 }

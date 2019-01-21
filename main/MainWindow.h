@@ -24,12 +24,18 @@ class MainWindow : public QMainWindow
 		void projectLoaded(common::Project *newProject);
 		void projectTreeSelectionChanged();
 		void projectTreeCurrentItemChanged();
+		void updateLiveCaptureControls();
+		void liveCaptureStart();
+		void liveCaptureStop();
+		void liveCaptureStopAll();
 		void addCamera();
 		void deleteItems();
 
 		Ui_MainWindow *m_ui;
 
 		common::Project *m_currentProject;
+
+		QList<QMetaObject::Connection> m_updateLiveCaptureControlsConnections;
 };
 
 }

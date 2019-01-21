@@ -33,18 +33,9 @@
     <addaction name="actionNewProject"/>
     <addaction name="actionOpenProject"/>
     <addaction name="separator"/>
-    <addaction name="actionQuit"/>
-   </widget>
-   <widget class="QMenu" name="menu_Camera">
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="actionAddCamera"/>
-    <addaction name="actionAddPattern"/>
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
-    <addaction name="action_Capture_new_images"/>
-    <addaction name="action_Import_images"/>
+    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -53,16 +44,33 @@
     <addaction name="actionAbout_CameraCalibrationStudio"/>
     <addaction name="actionAboutQt"/>
    </widget>
+   <widget class="QMenu" name="menu_Live_Capture">
+    <property name="title">
+     <string>Ca&amp;mera</string>
+    </property>
+    <addaction name="actionAddCamera"/>
+    <addaction name="separator"/>
+    <addaction name="actionLiveCaptureStart"/>
+    <addaction name="actionLiveCaptureStop"/>
+    <addaction name="actionLiveCaptureStopAll"/>
+    <addaction name="actionLiveCaptureShoot"/>
+    <addaction name="separator"/>
+    <addaction name="action_Import_images"/>
+   </widget>
+   <widget class="QMenu" name="menuPattern">
+    <property name="title">
+     <string>Patter&amp;n</string>
+    </property>
+    <addaction name="actionAddPattern"/>
+   </widget>
    <addaction name="menu_Project"/>
-   <addaction name="menu_Camera"/>
+   <addaction name="menu_Live_Capture"/>
+   <addaction name="menuPattern"/>
    <addaction name="menu_Help"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
+  <widget class="QToolBar" name="projectToolBar">
    <property name="windowTitle">
-    <string>Main Toolbar</string>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
+    <string>Project Toolbar</string>
    </property>
    <property name="floatable">
     <bool>false</bool>
@@ -75,10 +83,6 @@
    </attribute>
    <addaction name="actionNewProject"/>
    <addaction name="actionOpenProject"/>
-   <addaction name="separator"/>
-   <addaction name="actionAddCamera"/>
-   <addaction name="actionAddPattern"/>
-   <addaction name="actionDelete"/>
   </widget>
   <widget class="ccs::main::ProjectTreeDockWidget" name="processTreeDockWidget">
    <property name="features">
@@ -96,7 +100,7 @@
   </widget>
   <widget class="QDockWidget" name="dockWidget_6">
    <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
@@ -258,6 +262,37 @@
     <number>8</number>
    </attribute>
   </widget>
+  <widget class="QToolBar" name="editToolBar">
+   <property name="windowTitle">
+    <string>Edit Toolbar</string>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAddCamera"/>
+   <addaction name="actionAddPattern"/>
+   <addaction name="actionDelete"/>
+  </widget>
+  <widget class="QToolBar" name="liveCaptureToolBar">
+   <property name="windowTitle">
+    <string>Live Capture Toolbar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionLiveCaptureStart"/>
+   <addaction name="actionLiveCaptureStop"/>
+   <addaction name="actionLiveCaptureShoot"/>
+  </widget>
   <action name="actionNewProject">
    <property name="icon">
     <iconset theme="document-new">
@@ -376,6 +411,47 @@
    </property>
    <property name="iconText">
     <string>Add Pa&amp;ttern</string>
+   </property>
+  </action>
+  <action name="actionLiveCaptureStart">
+   <property name="icon">
+    <iconset theme="media-playback-start">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Start Live Capture for Selected Camera(s)</string>
+   </property>
+   <property name="iconText">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionLiveCaptureStop">
+   <property name="icon">
+    <iconset theme="media-playback-stop">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Stop &amp;Live Capture for Selected Camera(s)</string>
+   </property>
+   <property name="iconText">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionLiveCaptureStopAll">
+   <property name="text">
+    <string>Stop Live &amp;Capture for All Cameras</string>
+   </property>
+  </action>
+  <action name="actionLiveCaptureShoot">
+   <property name="icon">
+    <iconset theme="camera-photo">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Shoot &amp;from Live Capture...</string>
+   </property>
+   <property name="iconText">
+    <string>Shoot</string>
    </property>
   </action>
   <zorder>dockWidget_6</zorder>

@@ -35,10 +35,16 @@ AddCameraWidget::~AddCameraWidget()
 
 QJsonObject AddCameraWidget::pluginData()
 {
+	QSize resolution = m_ui->resolutionComboBox->currentData().toSize();
+
 	QJsonObject r;
 	r["devicePath"] = m_devicePath;
 	r["cardName"] = m_cardString.constData();
 	r["driver"] = m_driverString.constData();
+
+	r["width"] = resolution.width();
+	r["height"] = resolution.height();
+
 	return r;
 }
 

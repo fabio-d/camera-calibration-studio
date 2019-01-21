@@ -43,6 +43,8 @@ class CameraItem : public BaseContentsItem
 		void fillCurrentItem(ProjectTreeDockWidget::CurrentItem *target) const override;
 
 	private:
+		void updateIcon();
+
 		common::Camera *m_camera;
 };
 

@@ -4,6 +4,7 @@ add_library(ccscommon SHARED
 	AddCameraWidget.cpp
 	Camera.cpp
 	CameraPlugin.cpp
+	LiveCapture.cpp
 	Project.cpp
 	Sensor.cpp
 	SqliteDatabase.cpp
