@@ -58,6 +58,11 @@ bool Camera::supportsLiveCapture() const
 		return false;
 }
 
+bool Camera::isLiveCaptureRunning() const
+{
+	return m_liveCapture != nullptr;
+}
+
 bool Camera::startLiveCapture()
 {
 	if (m_liveCapture != nullptr)
@@ -84,7 +89,10 @@ bool Camera::startLiveCapture()
 	// self-delete in case of camera acquisition errors.
 	connect(m_liveCapture, &QObject::destroyed, this, &Camera::liveCaptureDestroyed);
 
-	emit liveCaptureChanged();
+	// New frame callback
+	connect(m_liveCapture, &LiveCapture::frameCaptured, this, &Camera::onFrameCaptured);
+
+	emit liveCaptureRunningChanged();
 	return true;
 }
 
@@ -94,15 +102,29 @@ void Camera::stopLiveCapture()
 	delete m_liveCapture;
 }
 
-void Camera::liveCaptureDestroyed()
+const QMap<const Sensor*, cv::Mat> &Camera::lastCapturedFrame() const
 {
-	m_liveCapture = nullptr;
-	emit liveCaptureChanged();
+	return m_lastCapturedFrame;
 }
 
-LiveCapture *Camera::liveCapture() const
+void Camera::onFrameCaptured(const QList<cv::Mat> &images)
 {
-	return m_liveCapture;
+	assert(images.size() == m_sensors.size());
+
+	m_lastCapturedFrame.clear();
+	for (int i = 0; i < m_sensors.size(); i++)
+		m_lastCapturedFrame.insert(m_sensors[i], images[i]);
+
+	emit capturedFrameChanged();
+}
+
+void Camera::liveCaptureDestroyed()
+{
+	m_lastCapturedFrame.clear();
+	m_liveCapture = nullptr;
+
+	emit liveCaptureRunningChanged();
+	emit capturedFrameChanged();
 }
 
 }

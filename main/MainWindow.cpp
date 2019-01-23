@@ -106,7 +106,7 @@ void MainWindow::projectTreeSelectionChanged()
 	for (common::Camera *c : m_ui->processTreeDockWidget->selectedItems().cameras)
 	{
 		m_updateLiveCaptureControlsConnections <<
-			connect(c, &common::Camera::liveCaptureChanged, this, &MainWindow::updateLiveCaptureControls);
+			connect(c, &common::Camera::liveCaptureRunningChanged, this, &MainWindow::updateLiveCaptureControls);
 	}
 
 	updateLiveCaptureControls();
@@ -118,7 +118,10 @@ void MainWindow::projectTreeCurrentItemChanged()
 
 	m_ui->calibrationDataDockWidget->showSensor(it.sensor);
 
-	qCritical() << it.type << it.camera << it.sensor << it.imageType;
+	if (it.sensor != nullptr && it.imageType != common::Sensor::Invalid)
+		m_ui->centralWidget->showLiveCapture(it.camera, it.sensor, it.imageType);
+	else
+		m_ui->centralWidget->showNothing();
 }
 
 void MainWindow::updateLiveCaptureControls()
@@ -128,7 +131,7 @@ void MainWindow::updateLiveCaptureControls()
 	bool haveSelectedCamerasThatCanStopLiveCapture = false;
 	for (common::Camera *c : m_ui->processTreeDockWidget->selectedItems().cameras)
 	{
-		if (c->liveCapture() != nullptr)
+		if (c->isLiveCaptureRunning())
 			haveSelectedCamerasThatCanStopLiveCapture = true;
 		else if (c->supportsLiveCapture())
 			haveSelectedCamerasThatCanStartLiveCapture = true;
@@ -140,7 +143,7 @@ void MainWindow::updateLiveCaptureControls()
 	{
 		for (common::Camera *c : m_currentProject->cameras())
 		{
-			if (c->liveCapture() != nullptr)
+			if (c->isLiveCaptureRunning())
 				haveCamerasWithRunningLiveCapture = true;
 		}
 	}

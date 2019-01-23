@@ -31,16 +31,19 @@ class Camera : public QObject
 		CameraStaticInfo staticInfo() const;
 
 		bool supportsLiveCapture() const;
+		bool isLiveCaptureRunning() const;
 		bool startLiveCapture();
 		void stopLiveCapture();
-		LiveCapture *liveCapture() const; // nullptr if not running
+		const QMap<const Sensor*, cv::Mat> &lastCapturedFrame() const;
 
 	signals:
-		void liveCaptureChanged();
+		void liveCaptureRunningChanged();
+		void capturedFrameChanged();
 
 	private:
 		Camera(SqliteDatabase *db, int cameraId);
 
+		void onFrameCaptured(const QList<cv::Mat> &images);
 		void liveCaptureDestroyed();
 
 		SqliteDatabase *m_db;
@@ -48,7 +51,8 @@ class Camera : public QObject
 		QString m_name;
 		QList<Sensor*> m_sensors;
 
-		LiveCapture *m_liveCapture;
+		LiveCapture *m_liveCapture; // nullptr if not running
+		QMap<const Sensor*, cv::Mat> m_lastCapturedFrame;
 
 		// CameraStaticInfo
 		QString m_pluginId;

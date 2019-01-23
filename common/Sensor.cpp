@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QImage>
 
+#include <opencv2/imgproc/imgproc.hpp>
+
 namespace ccs::common
 {
 
@@ -70,9 +72,13 @@ void Sensor::setCalibrationParameters(const CalibrationParameters &p)
 	emit calibrationParametersChanged();
 }
 
-QImage Sensor::renderImage(const QImage &input, ImageType imageType) const
+QImage Sensor::renderImage(const cv::Mat &input, ImageType imageType) const
 {
-	return input;
+	QImage img(input.cols, input.rows, QImage::Format_RGB888);
+	cv::Mat qtImg(img.height(), img.width(), CV_8UC3, img.bits());
+	cv::cvtColor(input, qtImg, cv::COLOR_BGR2RGB);
+
+	return img;
 }
 
 SensorStaticInfo Sensor::staticInfo() const

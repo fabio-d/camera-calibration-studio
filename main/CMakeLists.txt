@@ -1,6 +1,7 @@
 add_executable(ccs
 	AddCameraDialog.cpp
 	CalibrationDataDockWidget.cpp
+	CentralWidget.cpp
 	MainWindow.cpp
 	ProjectTreeDockWidget.cpp
 	ProjectTreeItems.cpp

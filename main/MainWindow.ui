@@ -16,7 +16,7 @@
   <property name="dockOptions">
    <set>QMainWindow::AnimatedDocks</set>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <widget class="ccs::main::CentralWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
@@ -468,6 +468,12 @@
    <class>ccs::main::CalibrationDataDockWidget</class>
    <extends>QDockWidget</extends>
    <header>main/CalibrationDataDockWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ccs::main::CentralWidget</class>
+   <extends>QWidget</extends>
+   <header>main/CentralWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -4,6 +4,8 @@
 
 #include <QObject>
 
+#include <opencv2/core/core.hpp>
+
 namespace ccs::common
 {
 
@@ -41,7 +43,7 @@ class Sensor : public QObject
 		const CalibrationParameters &calibrationParameters() const;
 		void setCalibrationParameters(const CalibrationParameters &p);
 
-		QImage renderImage(const QImage &input, ImageType imageType) const;
+		QImage renderImage(const cv::Mat &input, ImageType imageType) const;
 
 		SensorStaticInfo staticInfo() const;
 
