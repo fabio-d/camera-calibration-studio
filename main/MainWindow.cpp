@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QUuid>
 
 #include "ui_MainWindow.h"
 
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_ui->actionLiveCaptureStart, &QAction::triggered, this, &MainWindow::liveCaptureStart);
 	connect(m_ui->actionLiveCaptureStop, &QAction::triggered, this, &MainWindow::liveCaptureStop);
 	connect(m_ui->actionLiveCaptureStopAll, &QAction::triggered, this, &MainWindow::liveCaptureStopAll);
+	connect(m_ui->actionLiveCaptureShoot, &QAction::triggered, this, &MainWindow::liveCaptureShoot);
 	connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 
 	connect(m_ui->processTreeDockWidget, &ProjectTreeDockWidget::selectionChanged, this, &MainWindow::projectTreeSelectionChanged);
@@ -100,7 +102,8 @@ void MainWindow::projectTreeSelectionChanged()
 		disconnect(c);
 	m_updateLiveCaptureControlsConnections.clear();
 
-	m_ui->actionDelete->setEnabled(m_ui->processTreeDockWidget->selectedItems().cameras.isEmpty() == false);
+	m_ui->actionDelete->setEnabled(!m_ui->processTreeDockWidget->selectedItems().cameras.isEmpty()
+		|| !m_ui->processTreeDockWidget->selectedItems().shots.isEmpty());
 
 	// Create new connections
 	for (common::Camera *c : m_ui->processTreeDockWidget->selectedItems().cameras)
@@ -119,9 +122,16 @@ void MainWindow::projectTreeCurrentItemChanged()
 	m_ui->calibrationDataDockWidget->showSensor(it.sensor);
 
 	if (it.sensor != nullptr && it.imageType != common::Sensor::Invalid)
-		m_ui->centralWidget->showLiveCapture(it.camera, it.sensor, it.imageType);
+	{
+		if (it.type == ProjectTreeDockWidget::CurrentItem::Shot)
+			m_ui->centralWidget->showShot(it.shot, it.sensor, it.imageType);
+		else
+			m_ui->centralWidget->showLiveCapture(it.camera, it.sensor, it.imageType);
+	}
 	else
+	{
 		m_ui->centralWidget->showNothing();
+	}
 }
 
 void MainWindow::updateLiveCaptureControls()
@@ -177,6 +187,24 @@ void MainWindow::liveCaptureStopAll()
 	updateLiveCaptureControls();
 }
 
+void MainWindow::liveCaptureShoot()
+{
+	QString randomName = "Image" + QUuid::createUuid().toString();
+
+	if (m_currentProject != nullptr)
+	{
+		for (common::Camera *c : m_currentProject->cameras())
+		{
+			if (c->isLiveCaptureRunning())
+			{
+				QMap<const common::Sensor*, cv::Mat> frame = c->lastCapturedFrame();
+				if (!frame.empty())
+					c->addShot(randomName, {}, frame);
+			}
+		}
+	}
+}
+
 void MainWindow::addCamera()
 {
 	AddCameraDialog d;
@@ -193,6 +221,9 @@ void MainWindow::deleteItems()
 
 	for (common::Camera *c : items.cameras)
 		m_currentProject->removeCamera(c);
+
+	for (common::Shot *s : items.shots)
+		s->camera()->removeShot(s);
 }
 
 }

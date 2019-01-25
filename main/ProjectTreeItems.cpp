@@ -64,11 +64,11 @@ CameraItem::CameraItem(common::Camera *camera)
 	connect(m_camera, &common::Camera::liveCaptureRunningChanged, this, &CameraItem::updateIcon);
 	updateIcon();
 
-	addChild(new ImageItem(camera, "IMG0001"));
-	addChild(new ImageItem(camera, "IMG0002"));
-	addChild(new ImageItem(camera, "IMG0003"));
-	addChild(new ImageItem(camera, "IMG0004"));
-	addChild(new ImageItem(camera, "IMG0005"));
+	for (common::Shot *s : camera->shots())
+		shotAdded(s);
+
+	connect(m_camera, &common::Camera::shotAdded, this, &CameraItem::shotAdded);
+	connect(m_camera, &common::Camera::shotRemoved, this, &CameraItem::shotRemoved);
 }
 
 void CameraItem::addToSelection(ProjectTreeDockWidget::Selection *target) const
@@ -90,22 +90,38 @@ void CameraItem::updateIcon()
 		setIcon(0, QIcon::fromTheme("camera-web"));
 }
 
-ImageItem::ImageItem(common::Camera *camera, const QString &text)
-: BaseContentsItem(text)
+void CameraItem::shotAdded(common::Shot *shot)
+{
+	ShotItem *item = new ShotItem(m_camera, shot);
+	m_shotItems.insert(shot, item);
+	addChild(item);
+}
+
+void CameraItem::shotRemoved(common::Shot *shot)
+{
+	auto it = m_shotItems.find(shot);
+	delete *it;
+	m_shotItems.erase(it);
+}
+
+ShotItem::ShotItem(common::Camera *camera, common::Shot *shot)
+: BaseContentsItem(shot->name())
 , m_camera(camera)
+, m_shot(shot)
 {
 	setIcon(0, QIcon::fromTheme("image"));
 }
 
-void ImageItem::addToSelection(ProjectTreeDockWidget::Selection *target) const
+void ShotItem::addToSelection(ProjectTreeDockWidget::Selection *target) const
 {
-	//target->cameras.insert(m_camera);
+	target->shots.insert(m_shot);
 }
 
-void ImageItem::fillCurrentItem(ProjectTreeDockWidget::CurrentItem *target) const
+void ShotItem::fillCurrentItem(ProjectTreeDockWidget::CurrentItem *target) const
 {
-	target->type = ProjectTreeDockWidget::CurrentItem::Camera;
+	target->type = ProjectTreeDockWidget::CurrentItem::Shot;
 	target->camera = m_camera;
+	target->shot = m_shot;
 }
 
 PatternsFolderItem::PatternsFolderItem(common::Project *project)

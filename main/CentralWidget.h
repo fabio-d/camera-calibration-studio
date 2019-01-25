@@ -20,6 +20,7 @@ class CentralWidget : public QWidget
 
 		void showNothing();
 		void showLiveCapture(common::Camera *camera, common::Sensor *sensor, common::Sensor::ImageType imageType);
+		void showShot(common::Shot *shot, common::Sensor *sensor, common::Sensor::ImageType imageType);
 
 	private:
 		void updateImage();
@@ -28,10 +29,16 @@ class CentralWidget : public QWidget
 
 		common::Sensor::ImageType m_imageType; // Invalid = showNothing
 
-		common::Camera *m_liveCaptureCamera;
-		common::Sensor *m_liveCaptureSensor;
-		QMetaObject::Connection m_liveCaptureNewFrameConnection;
+		// showLiveCapture AND showShot
+		common::Sensor *m_selectedSensor;
 		QMetaObject::Connection m_calibrationParametersConnection;
+
+		// showLiveCapture
+		common::Camera *m_liveCaptureCamera;
+		QMetaObject::Connection m_liveCaptureNewFrameConnection;
+
+		// showShot
+		common::Shot *m_shot;
 };
 
 }

@@ -22,6 +22,7 @@ class ProjectTreeDockWidget : public QDockWidget
 		struct Selection
 		{
 			QSet<common::Camera*> cameras;
+			QSet<common::Shot*> shots;
 		};
 
 		struct CurrentItem
@@ -29,13 +30,15 @@ class ProjectTreeDockWidget : public QDockWidget
 			enum
 			{
 				None,
-				Camera
+				Camera,
+				Shot
 			} type;
 
-			common::Camera *camera;
+			common::Camera *camera; // Camera
+			common::Shot *shot; // Camera, Shot
 
-			common::Sensor *sensor;
-			common::Sensor::ImageType imageType;
+			common::Sensor *sensor; // Camera, Shot
+			common::Sensor::ImageType imageType; // Camera, Shot
 		};
 
 		ProjectTreeDockWidget(QWidget *parent);

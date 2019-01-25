@@ -22,11 +22,15 @@ Camera::Camera(SqliteDatabase *db, int cameraId)
 
 	for (const QSqlRecord &querySensor : m_db->exec("SELECT id FROM sensor WHERE camera_id=?", {cameraId}))
 		m_sensors.append(new Sensor(m_db, querySensor.value(0).toInt()));
+
+	for (const QSqlRecord &queryShot : m_db->exec("SELECT id FROM shot WHERE camera_id=?", {cameraId}))
+		m_shots.insert(new Shot(m_db, this, queryShot.value(0).toInt()));
 }
 
 Camera::~Camera()
 {
 	delete m_liveCapture;
+	qDeleteAll(m_shots);
 	qDeleteAll(m_sensors);
 }
 
@@ -125,6 +129,41 @@ void Camera::liveCaptureDestroyed()
 
 	emit liveCaptureRunningChanged();
 	emit capturedFrameChanged();
+}
+
+Shot *Camera::addShot(const QString &name, const QJsonObject &captureParameters, const QMap<const Sensor*, cv::Mat> &frame)
+{
+	int shotId = m_db->execInsertId("INSERT INTO shot(name, capture_parameters, camera_id) VALUES (?, ?, ?)",
+		 {name, QJsonDocument(captureParameters).toJson(), m_cameraId});
+
+	for (QMap<const Sensor*, cv::Mat>::const_iterator it = frame.begin(); it != frame.end(); ++it)
+	{
+		const cv::Mat &m = it.value();
+
+		m_db->exec("INSERT INTO sensor_data(shot_id, sensor_id, camera_id, data) VALUES (?, ?, ?, ?)",
+			{shotId, it.key()->m_sensorId, m_cameraId, QByteArray::fromRawData((const char*)m.data, m.rows * m.cols * 3)});
+	}
+
+	Shot *shot = new Shot(m_db, this, shotId);
+	m_shots.insert(shot);
+	emit shotAdded(shot);
+
+	return shot;
+}
+
+void Camera::removeShot(Shot *shot)
+{
+	m_shots.remove(shot);
+	emit shotRemoved(shot);
+
+	m_db->exec("DELETE FROM shot WHERE id=?", {shot->m_shotId});
+
+	delete shot;
+}
+
+const QSet<Shot*> &Camera::shots() const
+{
+	return m_shots;
 }
 
 }

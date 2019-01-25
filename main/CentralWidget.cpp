@@ -35,8 +35,9 @@ void CentralWidget::showLiveCapture(common::Camera *camera, common::Sensor *sens
 	disconnect(m_liveCaptureNewFrameConnection);
 	disconnect(m_calibrationParametersConnection);
 
+	m_selectedSensor = sensor;
 	m_liveCaptureCamera = camera;
-	m_liveCaptureSensor = sensor;
+	m_shot = nullptr;
 	m_imageType = imageType;
 
 	m_liveCaptureNewFrameConnection = connect(
@@ -48,18 +49,43 @@ void CentralWidget::showLiveCapture(common::Camera *camera, common::Sensor *sens
 	updateImage();
 }
 
+void CentralWidget::showShot(common::Shot *shot, common::Sensor *sensor, common::Sensor::ImageType imageType)
+{
+	disconnect(m_liveCaptureNewFrameConnection);
+	disconnect(m_calibrationParametersConnection);
+
+	m_selectedSensor = sensor;
+	m_liveCaptureCamera = nullptr;
+	m_shot = shot;
+	m_imageType = imageType;
+
+	m_calibrationParametersConnection = connect(
+		sensor, &common::Sensor::calibrationParametersChanged,
+		this, &CentralWidget::updateImage);
+	updateImage();
+}
+
 void CentralWidget::updateImage()
 {
-	qCritical() << "HERE";
-
 	cv::Mat sensorImage;
 	if (m_imageType != common::Sensor::Invalid)
-		sensorImage = m_liveCaptureCamera->lastCapturedFrame().value(m_liveCaptureSensor, cv::Mat());
+	{
+		if (m_liveCaptureCamera != nullptr)
+		{
+			assert(m_shot == nullptr);
+			sensorImage = m_liveCaptureCamera->lastCapturedFrame().value(m_selectedSensor, cv::Mat());
+		}
+		else
+		{
+			assert(m_shot != nullptr);
+			sensorImage = m_shot->sensorData(m_selectedSensor);
+		}
+	}
 
 	if (sensorImage.empty())
 		m_ui->label->setPixmap(QPixmap());
 	else
-		m_ui->label->setPixmap(QPixmap::fromImage(m_liveCaptureSensor->renderImage(sensorImage, m_imageType)));
+		m_ui->label->setPixmap(QPixmap::fromImage(m_selectedSensor->renderImage(sensorImage, m_imageType)));
 }
 
 }

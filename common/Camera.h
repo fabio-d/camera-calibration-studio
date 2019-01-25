@@ -1,13 +1,13 @@
 #pragma once
 
-#include "common/Sensor.h"
+#include "common/LiveCapture.h"
+#include "common/Shot.h"
 
 #include <QJsonObject>
+#include <QSet>
 
 namespace ccs::common
 {
-
-class LiveCapture;
 
 struct CameraStaticInfo
 {
@@ -36,9 +36,16 @@ class Camera : public QObject
 		void stopLiveCapture();
 		const QMap<const Sensor*, cv::Mat> &lastCapturedFrame() const;
 
+		Shot *addShot(const QString &name, const QJsonObject &captureParameters, const QMap<const Sensor*, cv::Mat> &frame);
+		void removeShot(Shot *shot);
+		const QSet<Shot*> &shots() const;
+
 	signals:
 		void liveCaptureRunningChanged();
 		void capturedFrameChanged();
+
+		void shotAdded(Shot *shot);
+		void shotRemoved(Shot *shot);
 
 	private:
 		Camera(SqliteDatabase *db, int cameraId);
@@ -53,6 +60,8 @@ class Camera : public QObject
 
 		LiveCapture *m_liveCapture; // nullptr if not running
 		QMap<const Sensor*, cv::Mat> m_lastCapturedFrame;
+
+		QSet<Shot*> m_shots;
 
 		// CameraStaticInfo
 		QString m_pluginId;

@@ -7,6 +7,7 @@ add_library(ccscommon SHARED
 	LiveCapture.cpp
 	Project.cpp
 	Sensor.cpp
+	Shot.cpp
 	SqliteDatabase.cpp
 )
 

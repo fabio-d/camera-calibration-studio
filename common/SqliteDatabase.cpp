@@ -27,7 +27,31 @@ static void initSchema(SqliteDatabase *db)
 			width INTEGER NOT NULL,
 			height INTEGER NOT NULL,
 			calibration_parameters BLOB,
-			FOREIGN KEY(camera_id) REFERENCES camera(id)
+			UNIQUE(id, camera_id),
+			FOREIGN KEY(camera_id) REFERENCES camera(id) ON DELETE CASCADE
+		)
+	)");
+
+	db->exec(R"(
+		CREATE TABLE IF NOT EXISTS shot(
+			id INTEGER PRIMARY KEY,
+			camera_id TEXT NOT NULL,
+			name TEXT NOT NULL,
+			capture_parameters BLOB,
+			UNIQUE(id, camera_id),
+			FOREIGN KEY(camera_id) REFERENCES camera(id) ON DELETE CASCADE
+		)
+	)");
+
+	db->exec(R"(
+		CREATE TABLE IF NOT EXISTS sensor_data(
+			id INTEGER PRIMARY KEY,
+			camera_id INTEGER NOT NULL,
+			shot_id INTEGER NOT NULL,
+			sensor_id INTEGER NOT NULL,
+			data BLOB,
+			FOREIGN KEY(shot_id, camera_id) REFERENCES shot(id, camera_id) ON DELETE CASCADE,
+			FOREIGN KEY(sensor_id, camera_id) REFERENCES sensor(id, camera_id) ON DELETE CASCADE
 		)
 	)");
 }

@@ -59,6 +59,9 @@ ProjectTreeDockWidget::Selection ProjectTreeDockWidget::selectedItems() const
 	for (QTreeWidgetItem *it : m_ui->contentsTreeWidget->selectedItems())
 		static_cast<BaseContentsItem*>(it)->addToSelection(&r);
 
+	for (common::Camera *c : r.cameras)
+		r.shots -= c->shots();
+
 	return r;
 }
 
@@ -114,6 +117,7 @@ void ProjectTreeDockWidget::contentsCurrentItemChanged()
 	switch (it.type)
 	{
 		case ProjectTreeDockWidget::CurrentItem::Camera:
+		case ProjectTreeDockWidget::CurrentItem::Shot:
 			updateSensorTree(it.camera);
 			break;
 		default:

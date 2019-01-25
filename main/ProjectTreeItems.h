@@ -8,6 +8,7 @@ namespace ccs::main
 {
 
 class CameraItem;
+class ShotItem;
 
 class BaseContentsItem : public QObject, public QTreeWidgetItem
 {
@@ -44,20 +45,24 @@ class CameraItem : public BaseContentsItem
 
 	private:
 		void updateIcon();
+		void shotAdded(common::Shot *shot);
+		void shotRemoved(common::Shot *shot);
 
 		common::Camera *m_camera;
+		QMap<common::Shot*, ShotItem*> m_shotItems;
 };
 
-class ImageItem : public BaseContentsItem
+class ShotItem : public BaseContentsItem
 {
 	public:
-		explicit ImageItem(common::Camera *camera, const QString &text);
+		explicit ShotItem(common::Camera *camera, common::Shot *shot);
 
 		void addToSelection(ProjectTreeDockWidget::Selection *target) const override;
 		void fillCurrentItem(ProjectTreeDockWidget::CurrentItem *target) const override;
 
 	private:
 		common::Camera *m_camera;
+		common::Shot *m_shot;
 };
 
 class PatternsFolderItem : public BaseContentsItem

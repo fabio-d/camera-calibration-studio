@@ -28,6 +28,7 @@ class MainWindow : public QMainWindow
 		void liveCaptureStart();
 		void liveCaptureStop();
 		void liveCaptureStopAll();
+		void liveCaptureShoot();
 		void addCamera();
 		void deleteItems();
 

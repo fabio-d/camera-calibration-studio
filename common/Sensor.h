@@ -20,6 +20,7 @@ class Sensor : public QObject
 	Q_OBJECT
 
 	friend class Camera;
+	friend class Shot;
 
 	public:
 		enum ImageType

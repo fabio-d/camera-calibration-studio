@@ -56,7 +56,6 @@ Camera *Project::addCamera(const QString &cameraName, const CameraStaticInfo &in
 
 void Project::removeCamera(Camera *camera)
 {
-	m_db->exec("DELETE FROM sensor WHERE camera_id=?", {camera->m_cameraId});
 	m_db->exec("DELETE FROM camera WHERE id=?", {camera->m_cameraId});
 
 	m_cameras.remove(camera);
