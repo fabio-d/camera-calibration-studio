@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/CalibrationParameters.h"
 #include "common/SqliteDatabase.h"
 
 #include <QObject>
@@ -29,14 +30,6 @@ class Sensor : public QObject
 			Original,
 			Undistorted,
 			Mask
-		};
-
-		struct CalibrationParameters
-		{
-			// each of these value can be NAN if not set by the user
-			double fx, fy, cx, cy;
-			double p1, p2;
-			double k1, k2, k3, k4, k5, k6;
 		};
 
 		~Sensor();

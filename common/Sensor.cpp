@@ -11,21 +11,7 @@
 namespace ccs::common
 {
 
-static const QVector<QPair<double common::Sensor::CalibrationParameters::*, QString>> fields
-{
-	{ &common::Sensor::CalibrationParameters::fx, "fx" },
-	{ &common::Sensor::CalibrationParameters::fy, "fy" },
-	{ &common::Sensor::CalibrationParameters::cx, "cx" },
-	{ &common::Sensor::CalibrationParameters::cy, "cy" },
-	{ &common::Sensor::CalibrationParameters::p1, "p1" },
-	{ &common::Sensor::CalibrationParameters::p2, "p2" },
-	{ &common::Sensor::CalibrationParameters::k1, "k1" },
-	{ &common::Sensor::CalibrationParameters::k2, "k2" },
-	{ &common::Sensor::CalibrationParameters::k3, "k3" },
-	{ &common::Sensor::CalibrationParameters::k4, "k4" },
-	{ &common::Sensor::CalibrationParameters::k5, "k5" },
-	{ &common::Sensor::CalibrationParameters::k6, "k6" }
-};
+
 
 Sensor::Sensor(SqliteDatabase *db, int sensorId)
 : m_db(db)
@@ -38,18 +24,14 @@ Sensor::Sensor(SqliteDatabase *db, int sensorId)
 	m_height = queryCamera.value("height").toInt();
 
 	QJsonObject cp = QJsonDocument::fromJson(queryCamera.value("calibration_parameters").toByteArray()).object();
-	for (const auto &it : fields)
-	{
-		double v = cp.contains(it.second) ? cp.value(it.second).toDouble() : NAN;
-		m_calibrationParameters.*it.first = v;
-	}
+	m_calibrationParameters = CalibrationParameters(cp);
 }
 
 Sensor::~Sensor()
 {
 }
 
-const Sensor::CalibrationParameters &Sensor::calibrationParameters() const
+const CalibrationParameters &Sensor::calibrationParameters() const
 {
 	return m_calibrationParameters;
 }
@@ -58,25 +40,42 @@ void Sensor::setCalibrationParameters(const CalibrationParameters &p)
 {
 	m_calibrationParameters = p;
 
-	QJsonObject cp;
-	for (const auto &it : fields)
-	{
-		double v = p.*it.first;
-		if (!std::isnan(v))
-			cp.insert(it.second, v);
-	}
-
 	m_db->exec("UPDATE sensor SET calibration_parameters=? WHERE id=?",
-		 {QJsonDocument(cp).toJson(), m_sensorId});
+		 {QJsonDocument(p.serialize()).toJson(), m_sensorId});
 
 	emit calibrationParametersChanged();
 }
 
 QImage Sensor::renderImage(const cv::Mat &input, ImageType imageType) const
 {
-	QImage img(input.cols, input.rows, QImage::Format_RGB888);
+	cv::Mat m = imageType == ImageType::Mask ? cv::Mat(input.rows, input.cols, CV_8UC3, cv::Scalar(255, 255, 255)) : input;
+
+	if (imageType != ImageType::Original)
+	{
+		cv::Mat cameraMatrix = m_calibrationParameters.cameraMatrix(this);
+		std::vector<double> distCoeffs = m_calibrationParameters.distCoeffs(this);
+		cv::Size newSize = m_calibrationParameters.newSize(this);
+		cv::Mat newCameraMatrix = m_calibrationParameters.newCameraMatrix(this);
+
+		if (!cameraMatrix.empty())
+		{
+			cv::Mat map1, map2;
+			cv::initUndistortRectifyMap(cameraMatrix, distCoeffs,
+				cv::Mat(), newCameraMatrix, newSize,
+				CV_32FC1, map1, map2);
+
+			cv::remap(m.clone(), m, map1, map2, cv::INTER_LINEAR);
+		}
+		else
+		{
+			// cannot undistort, just show a black image
+			m = cv::Mat(newSize, CV_8UC3, cv::Scalar());
+		}
+	}
+
+	QImage img(m.cols, m.rows, QImage::Format_RGB888);
 	cv::Mat qtImg(img.height(), img.width(), CV_8UC3, img.bits());
-	cv::cvtColor(input, qtImg, cv::COLOR_BGR2RGB);
+	cv::cvtColor(m, qtImg, cv::COLOR_BGR2RGB);
 
 	return img;
 }

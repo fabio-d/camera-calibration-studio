@@ -9,45 +9,30 @@
 namespace ccs::main
 {
 
-static const QVector<QPair<double common::Sensor::CalibrationParameters::*, QLineEdit* Ui_CalibrationDataDockWidget::*>> fields
-{
-	{ &common::Sensor::CalibrationParameters::fx, &Ui_CalibrationDataDockWidget::fxLineEdit },
-	{ &common::Sensor::CalibrationParameters::fy, &Ui_CalibrationDataDockWidget::fyLineEdit },
-	{ &common::Sensor::CalibrationParameters::cx, &Ui_CalibrationDataDockWidget::cxLineEdit },
-	{ &common::Sensor::CalibrationParameters::cy, &Ui_CalibrationDataDockWidget::cyLineEdit },
-	{ &common::Sensor::CalibrationParameters::p1, &Ui_CalibrationDataDockWidget::p1LineEdit },
-	{ &common::Sensor::CalibrationParameters::p2, &Ui_CalibrationDataDockWidget::p2LineEdit },
-	{ &common::Sensor::CalibrationParameters::k1, &Ui_CalibrationDataDockWidget::k1LineEdit },
-	{ &common::Sensor::CalibrationParameters::k2, &Ui_CalibrationDataDockWidget::k2LineEdit },
-	{ &common::Sensor::CalibrationParameters::k3, &Ui_CalibrationDataDockWidget::k3LineEdit },
-	{ &common::Sensor::CalibrationParameters::k4, &Ui_CalibrationDataDockWidget::k4LineEdit },
-	{ &common::Sensor::CalibrationParameters::k5, &Ui_CalibrationDataDockWidget::k5LineEdit },
-	{ &common::Sensor::CalibrationParameters::k6, &Ui_CalibrationDataDockWidget::k6LineEdit }
-};
-
 CalibrationDataDockWidget::CalibrationDataDockWidget(QWidget *parent)
 : QDockWidget(parent)
 , m_ui(new Ui_CalibrationDataDockWidget)
-, m_localeC("C")
 , m_currentDockArea(Qt::BottomDockWidgetArea)
 , m_sensor(nullptr)
 {
 	m_ui->setupUi(this);
 
-	m_localeC.setNumberOptions(QLocale::RejectGroupSeparator | QLocale::RejectLeadingZeroInExponent);
+	//m_localeC.setNumberOptions(QLocale::RejectGroupSeparator | QLocale::RejectLeadingZeroInExponent);
 
 	connect(this, &QDockWidget::dockLocationChanged, this, &CalibrationDataDockWidget::dockAreaChanged);
 	connect(this, &QDockWidget::topLevelChanged, this, &CalibrationDataDockWidget::updateLayout);
 
-	QDoubleValidator *validator = new QDoubleValidator(this);
-	validator->setLocale(m_localeC);
-
-	for (const auto &it : fields)
+	for (const common::CalibrationParameter::MetaInfo &m : common::CalibrationParameters::allFields())
 	{
-		QLineEdit *le = m_ui->*it.second;
-		le->setValidator(validator);
+		QString fieldName = QString("%1LineEdit").arg(m.name());
+		QLineEdit *le = findChild<QLineEdit*>(fieldName);
+		if (le == nullptr)
+			qFatal("Field \"%s\" not found", fieldName.toLatin1().constData());
 
+		le->setValidator(m.createValidator(this));
 		connect(le, &QLineEdit::textEdited, this, &CalibrationDataDockWidget::editingFinished);
+
+		m_fields.insert(&m, le);
 	}
 }
 
@@ -64,22 +49,17 @@ void CalibrationDataDockWidget::showSensor(common::Sensor *sensor)
 	{
 		m_ui->dockWidgetContents->setCurrentWidget(m_ui->noParametersPage);
 
-		for (const auto &it : fields)
-			(m_ui->*it.second)->clear();
+		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
+			it.value()->clear();
 	}
 	else
 	{
 		m_ui->dockWidgetContents->setCurrentWidget(m_ui->parametersPage);
 
-		common::Sensor::CalibrationParameters p = sensor->calibrationParameters();
-		for (const auto &it : fields)
-		{
-			double v = p.*it.first;
-			if (std::isnan(v))
-				(m_ui->*it.second)->clear();
-			else
-				(m_ui->*it.second)->setText(QString::number(v));
-		}
+		const common::CalibrationParameters &p = sensor->calibrationParameters();
+
+		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
+			it.value()->setText(it.key()->valueAsText(&p));
 
 		m_sensor = sensor;
 	}
@@ -87,20 +67,10 @@ void CalibrationDataDockWidget::showSensor(common::Sensor *sensor)
 
 void CalibrationDataDockWidget::editingFinished()
 {
-	common::Sensor::CalibrationParameters p = m_sensor->calibrationParameters();
+	common::CalibrationParameters p = m_sensor->calibrationParameters();
 
-	for (const auto &it : fields)
-	{
-		QLineEdit *le = m_ui->*it.second;
-		if (sender() == le)
-		{
-			bool ok;
-			double v = le->text().toDouble(&ok);
-
-			p.*it.first = ok ? v : NAN;
-			break;
-		}
-	}
+	for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
+		it.key()->setValueFromText(&p, it.value()->text());
 
 	m_sensor->setCalibrationParameters(p);
 }

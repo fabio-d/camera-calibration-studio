@@ -2,6 +2,7 @@ find_package(Qt5Sql REQUIRED)
 
 add_library(ccscommon SHARED
 	AddCameraWidget.cpp
+	CalibrationParameters.cpp
 	Camera.cpp
 	CameraPlugin.cpp
 	LiveCapture.cpp

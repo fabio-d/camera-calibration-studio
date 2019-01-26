@@ -3,7 +3,7 @@
 #include "common/Sensor.h"
 
 #include <QDockWidget>
-#include <QLocale>
+#include <QLineEdit>
 
 namespace ccs::main
 {
@@ -28,9 +28,10 @@ class CalibrationDataDockWidget : public QDockWidget
 	private:
 		Ui_CalibrationDataDockWidget *m_ui;
 
-		QLocale m_localeC;
 		Qt::DockWidgetArea m_currentDockArea;
 		common::Sensor *m_sensor;
+
+		QMap<const common::CalibrationParameter::MetaInfo*, QLineEdit*> m_fields;
 };
 
 }
