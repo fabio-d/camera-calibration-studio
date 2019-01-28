@@ -14,6 +14,7 @@ CalibrationDataDockWidget::CalibrationDataDockWidget(QWidget *parent)
 , m_ui(new Ui_CalibrationDataDockWidget)
 , m_currentDockArea(Qt::BottomDockWidgetArea)
 , m_sensor(nullptr)
+, m_pattern(nullptr)
 {
 	m_ui->setupUi(this);
 
@@ -30,10 +31,15 @@ CalibrationDataDockWidget::CalibrationDataDockWidget(QWidget *parent)
 			qFatal("Field \"%s\" not found", fieldName.toLatin1().constData());
 
 		le->setValidator(m.createValidator(this));
-		connect(le, &QLineEdit::textEdited, this, &CalibrationDataDockWidget::editingFinished);
+		connect(le, &QLineEdit::textEdited, this, &CalibrationDataDockWidget::applyValues);
 
-		m_fields.insert(&m, le);
+		m_sensorFields.insert(&m, le);
 	}
+
+	connect(m_ui->cornerDistanceXDoubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+		this, &CalibrationDataDockWidget::applyValues);
+	connect(m_ui->cornerDistanceYDoubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+		this, &CalibrationDataDockWidget::applyValues);
 }
 
 CalibrationDataDockWidget::~CalibrationDataDockWidget()
@@ -41,38 +47,80 @@ CalibrationDataDockWidget::~CalibrationDataDockWidget()
 	delete m_ui;
 }
 
+void CalibrationDataDockWidget::showNothing()
+{
+	showSensor(nullptr);
+	showPattern(nullptr);
+
+	m_ui->dockWidgetContents->setCurrentWidget(m_ui->noParametersPage);
+}
+
 void CalibrationDataDockWidget::showSensor(common::Sensor *sensor)
 {
+	if (m_sensor == sensor)
+		return;
+
 	m_sensor = nullptr;
+	showPattern(nullptr);
 
 	if (sensor == nullptr)
 	{
-		m_ui->dockWidgetContents->setCurrentWidget(m_ui->noParametersPage);
-
-		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
+		for (auto it = m_sensorFields.begin(); it != m_sensorFields.end(); ++it)
 			it.value()->clear();
 	}
 	else
 	{
-		m_ui->dockWidgetContents->setCurrentWidget(m_ui->parametersPage);
+		m_ui->dockWidgetContents->setCurrentWidget(m_ui->sensorParametersPage);
 
 		const common::CalibrationParameters &p = sensor->calibrationParameters();
 
-		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
+		for (auto it = m_sensorFields.begin(); it != m_sensorFields.end(); ++it)
 			it.value()->setText(it.key()->valueAsText(&p));
 
 		m_sensor = sensor;
 	}
 }
 
-void CalibrationDataDockWidget::editingFinished()
+void CalibrationDataDockWidget::showPattern(common::Pattern *pattern)
 {
-	common::CalibrationParameters p = m_sensor->calibrationParameters();
+	if (m_pattern == pattern)
+		return;
 
-	for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
-		it.key()->setValueFromText(&p, it.value()->text());
+	m_pattern = nullptr;
+	showSensor(nullptr);
 
-	m_sensor->setCalibrationParameters(p);
+	if (pattern == nullptr)
+	{
+		m_ui->cornerDistanceXDoubleSpinBox->clear();
+		m_ui->cornerDistanceYDoubleSpinBox->clear();
+	}
+	else
+	{
+		m_ui->dockWidgetContents->setCurrentWidget(m_ui->patternParametersPage);
+
+		m_ui->cornerDistanceXDoubleSpinBox->setValue(pattern->cornerDistanceX());
+		m_ui->cornerDistanceYDoubleSpinBox->setValue(pattern->cornerDistanceY());
+
+		m_pattern = pattern;
+	}
+}
+
+void CalibrationDataDockWidget::applyValues()
+{
+	if (m_sensor != nullptr)
+	{
+		common::CalibrationParameters p = m_sensor->calibrationParameters();
+
+		for (auto it = m_sensorFields.begin(); it != m_sensorFields.end(); ++it)
+			it.key()->setValueFromText(&p, it.value()->text());
+
+		m_sensor->setCalibrationParameters(p);
+	}
+	else if (m_pattern != nullptr)
+	{
+		m_pattern->setCornerDistanceX(m_ui->cornerDistanceXDoubleSpinBox->value());
+		m_pattern->setCornerDistanceY(m_ui->cornerDistanceYDoubleSpinBox->value());
+	}
 }
 
 void CalibrationDataDockWidget::dockAreaChanged(Qt::DockWidgetArea area)
@@ -88,25 +136,25 @@ void CalibrationDataDockWidget::updateLayout()
 	if (m_currentDockArea == Qt::LeftDockWidgetArea || m_currentDockArea == Qt::RightDockWidgetArea || isFloating())
 	{
 		m_ui->parametersLayout->setDirection(QBoxLayout::TopToBottom);
-		m_ui->parametersPage->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-		m_ui->parametersPage->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		m_ui->parametersPage->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored);
-		m_ui->parametersPage->setMinimumSize(
+		m_ui->sensorParametersPage->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+		m_ui->sensorParametersPage->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		m_ui->sensorParametersPage->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored);
+		m_ui->sensorParametersPage->setMinimumSize(
 			m_ui->parametersLayout->minimumSize().width()
-				+ m_ui->parametersPage->verticalScrollBar()->width()
+				+ m_ui->sensorParametersPage->verticalScrollBar()->width()
 				+ m.left() + m.right(),
 			0);
 	}
 	else
 	{
 		m_ui->parametersLayout->setDirection(QBoxLayout::LeftToRight);
-		m_ui->parametersPage->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		m_ui->parametersPage->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-		m_ui->parametersPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-		m_ui->parametersPage->setMinimumSize(
+		m_ui->sensorParametersPage->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		m_ui->sensorParametersPage->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+		m_ui->sensorParametersPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+		m_ui->sensorParametersPage->setMinimumSize(
 			0,
 			m_ui->parametersLayout->minimumSize().height()
-				+ m_ui->parametersPage->horizontalScrollBar()->height()
+				+ m_ui->sensorParametersPage->horizontalScrollBar()->height()
 				+ m.top() + m.bottom());
 	}
 }

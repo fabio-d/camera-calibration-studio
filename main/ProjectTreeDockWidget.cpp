@@ -52,6 +52,11 @@ void ProjectTreeDockWidget::highlightCamera(common::Camera *camera)
 	m_camerasFolder->highlightCamera(camera);
 }
 
+void ProjectTreeDockWidget::highlightPattern(common::Pattern *pattern)
+{
+	m_patternsFolder->highlightPattern(pattern);
+}
+
 ProjectTreeDockWidget::Selection ProjectTreeDockWidget::selectedItems() const
 {
 	Selection r;

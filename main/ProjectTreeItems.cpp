@@ -129,6 +129,56 @@ PatternsFolderItem::PatternsFolderItem(common::Project *project)
 {
 	setIcon(0, QIcon::fromTheme("folder"));
 	setFlags(flags() & ~Qt::ItemIsSelectable);
+
+	for (common::Pattern *p : project->patterns())
+		patternAdded(p);
+
+	connect(project, &common::Project::patternAdded, this, &PatternsFolderItem::patternAdded);
+	connect(project, &common::Project::patternRemoved, this, &PatternsFolderItem::patternRemoved);
+}
+
+void PatternsFolderItem::highlightPattern(common::Pattern *pattern)
+{
+	PatternItem *it = m_patternItems.value(pattern);
+	QTreeWidget *treeWidget = it->treeWidget();
+
+	setExpanded(true);
+
+	treeWidget->clearSelection();
+	treeWidget->scrollToItem(it);
+	treeWidget->setCurrentItem(it);
+	it->setSelected(true);
+}
+
+void PatternsFolderItem::patternAdded(common::Pattern *pattern)
+{
+	PatternItem *it = new PatternItem(pattern);
+	m_patternItems.insert(pattern, it);
+	addChild(it);
+}
+
+void PatternsFolderItem::patternRemoved(common::Pattern *pattern)
+{
+	PatternItem *it = m_patternItems.take(pattern);
+	delete it;
+}
+
+PatternItem::PatternItem(common::Pattern *pattern)
+: BaseContentsItem(pattern->name())
+, m_pattern(pattern)
+{
+	setIcon(0, QIcon::fromTheme("preferences-desktop-personal"));
+}
+
+void PatternItem::addToSelection(ProjectTreeDockWidget::Selection *target) const
+{
+	target->patterns.insert(m_pattern);
+}
+
+void PatternItem::fillCurrentItem(ProjectTreeDockWidget::CurrentItem *target) const
+{
+	target->type = ProjectTreeDockWidget::CurrentItem::Pattern;
+	target->pattern = m_pattern;
 }
 
 BaseSensorItem::BaseSensorItem(const QString &text)

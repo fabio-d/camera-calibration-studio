@@ -30,6 +30,7 @@ class MainWindow : public QMainWindow
 		void liveCaptureStopAll();
 		void liveCaptureShoot();
 		void addCamera();
+		void addPattern();
 		void deleteItems();
 
 		Ui_MainWindow *m_ui;

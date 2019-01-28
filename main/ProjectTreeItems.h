@@ -8,6 +8,7 @@ namespace ccs::main
 {
 
 class CameraItem;
+class PatternItem;
 class ShotItem;
 
 class BaseContentsItem : public QObject, public QTreeWidgetItem
@@ -69,6 +70,26 @@ class PatternsFolderItem : public BaseContentsItem
 {
 	public:
 		explicit PatternsFolderItem(common::Project *project);
+
+		void highlightPattern(common::Pattern *pattern);
+
+	private:
+		void patternAdded(common::Pattern *pattern);
+		void patternRemoved(common::Pattern *pattern);
+
+		QMap<common::Pattern*, PatternItem*> m_patternItems;
+};
+
+class PatternItem : public BaseContentsItem
+{
+	public:
+		explicit PatternItem(common::Pattern *pattern);
+
+		void addToSelection(ProjectTreeDockWidget::Selection *target) const override;
+		void fillCurrentItem(ProjectTreeDockWidget::CurrentItem *target) const override;
+
+	private:
+		common::Pattern *m_pattern;
 };
 
 class BaseSensorItem : public QObject, public QTreeWidgetItem

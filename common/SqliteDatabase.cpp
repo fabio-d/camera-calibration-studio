@@ -54,6 +54,17 @@ static void initSchema(SqliteDatabase *db)
 			FOREIGN KEY(sensor_id, camera_id) REFERENCES sensor(id, camera_id) ON DELETE CASCADE
 		)
 	)");
+
+	db->exec(R"(
+		CREATE TABLE IF NOT EXISTS pattern(
+			id INTEGER PRIMARY KEY,
+			name TEXT NOT NULL,
+			corner_count_x INTEGER NOT NULL,
+			corner_count_y INTEGER NOT NULL,
+			corner_distance_x DOUBLE,
+			corner_distance_y DOUBLE
+		)
+	)");
 }
 
 SqliteDatabase::SqliteDatabase(const QString &path)

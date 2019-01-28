@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Pattern.h"
 #include "common/Sensor.h"
 
 #include <QDockWidget>
@@ -18,10 +19,12 @@ class CalibrationDataDockWidget : public QDockWidget
 		CalibrationDataDockWidget(QWidget *parent);
 		~CalibrationDataDockWidget();
 
+		void showNothing();
 		void showSensor(common::Sensor *sensor);
+		void showPattern(common::Pattern *pattern);
 
 	protected:
-		void editingFinished();
+		void applyValues();
 		void dockAreaChanged(Qt::DockWidgetArea area);
 		void updateLayout();
 
@@ -30,8 +33,9 @@ class CalibrationDataDockWidget : public QDockWidget
 
 		Qt::DockWidgetArea m_currentDockArea;
 		common::Sensor *m_sensor;
+		common::Pattern *m_pattern;
 
-		QMap<const common::CalibrationParameter::MetaInfo*, QLineEdit*> m_fields;
+		QMap<const common::CalibrationParameter::MetaInfo*, QLineEdit*> m_sensorFields;
 };
 
 }

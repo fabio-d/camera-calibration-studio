@@ -1,6 +1,7 @@
 #include "common/Project.h"
 
 #include "common/Camera.h"
+#include "common/Pattern.h"
 
 #include <QJsonDocument>
 
@@ -22,11 +23,15 @@ Project::Project(SqliteDatabase *db)
 {
 	for (const QSqlRecord &cameraRecord : m_db->exec("SELECT id FROM camera"))
 		m_cameras.insert(new Camera(m_db, cameraRecord.value(0).toInt()));
+
+	for (const QSqlRecord &patternRecord : m_db->exec("SELECT id FROM pattern"))
+		m_patterns.insert(new Pattern(m_db, patternRecord.value(0).toInt()));
 }
 
 Project::~Project()
 {
 	qDeleteAll(m_cameras);
+	qDeleteAll(m_patterns);
 
 	delete m_db;
 }
@@ -62,6 +67,33 @@ void Project::removeCamera(Camera *camera)
 	emit cameraRemoved(camera);
 
 	delete camera;
+}
+
+const QSet<Pattern*> &Project::patterns() const
+{
+	return m_patterns;
+}
+
+Pattern *Project::addPattern(const QString &patternName, int cornerCountX, int cornerCountY)
+{
+	int patId = m_db->execInsertId("INSERT INTO pattern(name, corner_count_x, corner_count_y) VALUES (?, ?, ?)",
+		{patternName, cornerCountX, cornerCountY});
+
+	Pattern *pattern = new Pattern(m_db, patId);
+	m_patterns.insert(pattern);
+	emit patternAdded(pattern);
+
+	return pattern;
+}
+
+void Project::removePattern(Pattern *pattern)
+{
+	m_db->exec("DELETE FROM pattern WHERE id=?", {pattern->m_patternId});
+
+	m_patterns.remove(pattern);
+	emit patternRemoved(pattern);
+
+	delete pattern;
 }
 
 }

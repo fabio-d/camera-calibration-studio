@@ -6,6 +6,7 @@ add_library(ccscommon SHARED
 	Camera.cpp
 	CameraPlugin.cpp
 	LiveCapture.cpp
+	Pattern.cpp
 	Project.cpp
 	Sensor.cpp
 	Shot.cpp

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Camera.h"
+#include "common/Pattern.h"
 #include "common/Project.h"
 #include "common/Sensor.h"
 
@@ -23,6 +24,7 @@ class ProjectTreeDockWidget : public QDockWidget
 		{
 			QSet<common::Camera*> cameras;
 			QSet<common::Shot*> shots;
+			QSet<common::Pattern*> patterns;
 		};
 
 		struct CurrentItem
@@ -31,7 +33,8 @@ class ProjectTreeDockWidget : public QDockWidget
 			{
 				None,
 				Camera,
-				Shot
+				Shot,
+				Pattern
 			} type;
 
 			common::Camera *camera; // Camera
@@ -39,6 +42,8 @@ class ProjectTreeDockWidget : public QDockWidget
 
 			common::Sensor *sensor; // Camera, Shot
 			common::Sensor::ImageType imageType; // Camera, Shot
+
+			common::Pattern *pattern; // Pattern
 		};
 
 		ProjectTreeDockWidget(QWidget *parent);
@@ -47,6 +52,7 @@ class ProjectTreeDockWidget : public QDockWidget
 		void setProject(common::Project *project);
 
 		void highlightCamera(common::Camera *camera);
+		void highlightPattern(common::Pattern *pattern);
 
 		Selection selectedItems() const;
 		CurrentItem currentItem() const;

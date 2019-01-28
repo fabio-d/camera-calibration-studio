@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Camera.h"
+#include "common/Pattern.h"
 #include "common/Sensor.h"
 
 #include <QWidget>
@@ -21,6 +22,7 @@ class CentralWidget : public QWidget
 		void showNothing();
 		void showLiveCapture(common::Camera *camera, common::Sensor *sensor, common::Sensor::ImageType imageType);
 		void showShot(common::Shot *shot, common::Sensor *sensor, common::Sensor::ImageType imageType);
+		void showPattern(common::Pattern *pattern);
 
 	private:
 		void updateImage();
@@ -39,6 +41,10 @@ class CentralWidget : public QWidget
 
 		// showShot
 		common::Shot *m_shot;
+
+		//showPattern
+		common::Pattern *m_pattern;
+		QMetaObject::Connection m_patternGeometryChanged;
 };
 
 }

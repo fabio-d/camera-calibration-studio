@@ -1,6 +1,7 @@
 #include "main/MainWindow.h"
 
 #include "main/AddCameraDialog.h"
+#include "main/AddPatternDialog.h"
 
 #include <QDebug>
 #include <QFile>
@@ -26,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_ui->actionDelete->setShortcut(QKeySequence::Delete);
 
 	connect(m_ui->actionAddCamera, &QAction::triggered, this, &MainWindow::addCamera);
+	connect(m_ui->actionAddPattern, &QAction::triggered, this, &MainWindow::addPattern);
 	connect(m_ui->actionDelete, &QAction::triggered, this, &MainWindow::deleteItems);
 	connect(m_ui->actionLiveCaptureStart, &QAction::triggered, this, &MainWindow::liveCaptureStart);
 	connect(m_ui->actionLiveCaptureStop, &QAction::triggered, this, &MainWindow::liveCaptureStop);
@@ -103,7 +105,8 @@ void MainWindow::projectTreeSelectionChanged()
 	m_updateLiveCaptureControlsConnections.clear();
 
 	m_ui->actionDelete->setEnabled(!m_ui->processTreeDockWidget->selectedItems().cameras.isEmpty()
-		|| !m_ui->processTreeDockWidget->selectedItems().shots.isEmpty());
+		|| !m_ui->processTreeDockWidget->selectedItems().shots.isEmpty()
+		|| !m_ui->processTreeDockWidget->selectedItems().patterns.isEmpty());
 
 	// Create new connections
 	for (common::Camera *c : m_ui->processTreeDockWidget->selectedItems().cameras)
@@ -119,17 +122,29 @@ void MainWindow::projectTreeCurrentItemChanged()
 {
 	ProjectTreeDockWidget::CurrentItem it = m_ui->processTreeDockWidget->currentItem();
 
-	m_ui->calibrationDataDockWidget->showSensor(it.sensor);
-
-	if (it.sensor != nullptr && it.imageType != common::Sensor::Invalid)
+	if (it.pattern != nullptr)
 	{
-		if (it.type == ProjectTreeDockWidget::CurrentItem::Shot)
+		assert(it.sensor == nullptr);
+
+		m_ui->calibrationDataDockWidget->showPattern(it.pattern);
+		m_ui->centralWidget->showPattern(it.pattern);
+	}
+	else if (it.sensor != nullptr)
+	{
+		assert(it.pattern == nullptr);
+
+		m_ui->calibrationDataDockWidget->showSensor(it.sensor);
+
+		if (it.imageType == common::Sensor::Invalid)
+			m_ui->centralWidget->showNothing();
+		else if (it.type == ProjectTreeDockWidget::CurrentItem::Shot)
 			m_ui->centralWidget->showShot(it.shot, it.sensor, it.imageType);
 		else
 			m_ui->centralWidget->showLiveCapture(it.camera, it.sensor, it.imageType);
 	}
 	else
 	{
+		m_ui->calibrationDataDockWidget->showNothing();
 		m_ui->centralWidget->showNothing();
 	}
 }
@@ -215,6 +230,19 @@ void MainWindow::addCamera()
 	m_ui->processTreeDockWidget->highlightCamera(c);
 }
 
+void MainWindow::addPattern()
+{
+	AddPatternDialog d;
+	if (d.exec() != QDialog::Accepted)
+		return;
+
+	common::Pattern *p = m_currentProject->addPattern(d.patternName(), d.cornerCountX(), d.cornerCountY());
+	p->setCornerDistanceX(35.0);
+	p->setCornerDistanceY(p->cornerDistanceX());
+
+	m_ui->processTreeDockWidget->highlightPattern(p);
+}
+
 void MainWindow::deleteItems()
 {
 	ProjectTreeDockWidget::Selection items = m_ui->processTreeDockWidget->selectedItems();
@@ -224,6 +252,9 @@ void MainWindow::deleteItems()
 
 	for (common::Shot *s : items.shots)
 		s->camera()->removeShot(s);
+
+	for (common::Pattern *p : items.patterns)
+		m_currentProject->removePattern(p);
 }
 
 }

@@ -1,5 +1,6 @@
 add_executable(ccs
 	AddCameraDialog.cpp
+	AddPatternDialog.cpp
 	CalibrationDataDockWidget.cpp
 	CentralWidget.cpp
 	MainWindow.cpp
