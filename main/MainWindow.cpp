@@ -2,6 +2,7 @@
 
 #include "main/AddCameraDialog.h"
 #include "main/AddPatternDialog.h"
+#include "main/PrintPatternDialog.h"
 
 #include <QDebug>
 #include <QFile>
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_ui->actionLiveCaptureStop, &QAction::triggered, this, &MainWindow::liveCaptureStop);
 	connect(m_ui->actionLiveCaptureStopAll, &QAction::triggered, this, &MainWindow::liveCaptureStopAll);
 	connect(m_ui->actionLiveCaptureShoot, &QAction::triggered, this, &MainWindow::liveCaptureShoot);
+	connect(m_ui->actionPrintPattern, &QAction::triggered, this, &MainWindow::printPattern);
 	connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 
 	connect(m_ui->processTreeDockWidget, &ProjectTreeDockWidget::selectionChanged, this, &MainWindow::projectTreeSelectionChanged);
@@ -147,6 +149,8 @@ void MainWindow::projectTreeCurrentItemChanged()
 		m_ui->calibrationDataDockWidget->showNothing();
 		m_ui->centralWidget->showNothing();
 	}
+
+	m_ui->actionPrintPattern->setEnabled(it.pattern != nullptr);
 }
 
 void MainWindow::updateLiveCaptureControls()
@@ -237,7 +241,7 @@ void MainWindow::addPattern()
 		return;
 
 	common::Pattern *p = m_currentProject->addPattern(d.patternName(), d.cornerCountX(), d.cornerCountY());
-	p->setCornerDistanceX(35.0);
+	p->setCornerDistanceX(25.0);
 	p->setCornerDistanceY(p->cornerDistanceX());
 
 	m_ui->processTreeDockWidget->highlightPattern(p);
@@ -255,6 +259,15 @@ void MainWindow::deleteItems()
 
 	for (common::Pattern *p : items.patterns)
 		m_currentProject->removePattern(p);
+}
+
+void MainWindow::printPattern()
+{
+	common::Pattern *p = m_ui->processTreeDockWidget->currentItem().pattern;
+	assert(p != nullptr);
+
+	PrintPatternDialog d(p, this);
+	d.exec();
 }
 
 }

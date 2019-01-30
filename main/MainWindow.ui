@@ -62,6 +62,8 @@
      <string>Patter&amp;n</string>
     </property>
     <addaction name="actionAddPattern"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrintPattern"/>
    </widget>
    <addaction name="menu_Project"/>
    <addaction name="menu_Live_Capture"/>
@@ -293,6 +295,18 @@
    <addaction name="actionLiveCaptureStop"/>
    <addaction name="actionLiveCaptureShoot"/>
   </widget>
+  <widget class="QToolBar" name="patternToolBar">
+   <property name="windowTitle">
+    <string>Pattern Toolbar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionPrintPattern"/>
+  </widget>
   <action name="actionNewProject">
    <property name="icon">
     <iconset theme="document-new">
@@ -452,6 +466,18 @@
    </property>
    <property name="iconText">
     <string>Shoot</string>
+   </property>
+  </action>
+  <action name="actionPrintPattern">
+   <property name="icon">
+    <iconset theme="document-print">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Print Calibration Pattern...</string>
+   </property>
+   <property name="iconText">
+    <string>Print Pattern</string>
    </property>
   </action>
   <zorder>dockWidget_6</zorder>

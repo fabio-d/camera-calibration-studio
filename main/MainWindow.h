@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow
 		void addCamera();
 		void addPattern();
 		void deleteItems();
+		void printPattern();
 
 		Ui_MainWindow *m_ui;
 

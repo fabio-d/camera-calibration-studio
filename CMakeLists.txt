@@ -7,7 +7,9 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(PkgConfig REQUIRED)
+find_package(Qt5PrintSupport REQUIRED)
 find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Sql REQUIRED)
 
 pkg_check_modules(OPENCV3 REQUIRED opencv>=3)
 include_directories(${OPENCV3_INCLUDE_DIRS})

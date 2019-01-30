@@ -4,11 +4,11 @@ add_executable(ccs
 	CalibrationDataDockWidget.cpp
 	CentralWidget.cpp
 	MainWindow.cpp
+	PrintPatternDialog.cpp
 	ProjectTreeDockWidget.cpp
 	ProjectTreeItems.cpp
 
 	main.cpp
 )
-
-target_link_libraries(ccs ccscommon)
+target_link_libraries(ccs ccscommon Qt5::PrintSupport)
 install(TARGETS ccs DESTINATION .)
