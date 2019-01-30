@@ -130,8 +130,10 @@ void CentralWidget::updateImage()
 				pixelated.at<uint8_t>(r, c) = invert == !((r+c)%2) ? 255 : 0;
 
 		cv::Mat result;
-		copyMakeBorder(pixelated, result, 1, 1, 1, 1, cv::BORDER_CONSTANT, 255);
-		cv::resize(result, result, cv::Size(fullSizeX * multiplier, fullSizeY * multiplier), 0, 0, cv::INTER_NEAREST);
+		cv::resize(pixelated, result, cv::Size(fullSizeX * multiplier, fullSizeY * multiplier), 0, 0, cv::INTER_NEAREST);
+
+		int borderPx = 20;
+		copyMakeBorder(result, result, borderPx, borderPx, borderPx, borderPx, cv::BORDER_CONSTANT, 255);
 
 		QImage img(result.cols, result.rows, QImage::Format_RGB888);
 		cv::Mat qtImg(img.height(), img.width(), CV_8UC3, img.bits(), img.bytesPerLine());
