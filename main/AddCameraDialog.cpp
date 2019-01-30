@@ -50,6 +50,7 @@ void AddCameraDialog::selectWidget()
 	}
 
 	m_ui->pluginStackedWidget->setCurrentWidget(*it);
+	updateControls();
 }
 
 void AddCameraDialog::updateControls()

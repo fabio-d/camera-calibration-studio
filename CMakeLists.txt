@@ -25,3 +25,4 @@ add_subdirectory(main)
 
 # Camera plugins
 add_subdirectory(camera_V4L2)
+add_subdirectory(camera_gazebo)
