@@ -95,7 +95,7 @@ void CalibrationParameter::MetaInfo::setValueFromJson(CalibrationParameters *tar
 	CalibrationParameter &p = target->m_params[m_name];
 	assert(p.m_metaInfo == this);
 
-	if (value.isNull())
+	if (value.isNull() || value.isUndefined())
 	{
 		p.m_isSet = false;
 	}
