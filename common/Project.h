@@ -21,6 +21,9 @@ class Project : public QObject
 		static Project *createOrOpen(const QString &filePath);
 		~Project();
 
+		bool isDirtyState() const;
+		bool commit();
+
 		const QSet<Camera*> &cameras() const;
 		Camera *addCamera(const QString &cameraName, const CameraStaticInfo &info);
 		void removeCamera(Camera *camera);
@@ -30,6 +33,7 @@ class Project : public QObject
 		void removePattern(Pattern *pattern);
 
 	signals:
+		void dirtyStateChanged(bool dirtyState);
 		void cameraAdded(Camera *camera);
 		void cameraRemoved(Camera *camera);
 		void patternAdded(Pattern *pattern);
@@ -37,6 +41,8 @@ class Project : public QObject
 
 	private:
 		explicit Project(SqliteDatabase *db);
+
+		void dbDirtyStateChanged();
 
 		SqliteDatabase *m_db;
 		QSet<Camera*> m_cameras;

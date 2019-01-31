@@ -4,6 +4,7 @@
 #include "main/AddPatternDialog.h"
 #include "main/PrintPatternDialog.h"
 
+#include <QCloseEvent>
 #include <QDebug>
 #include <QFile>
 #include <QFileDialog>
@@ -11,6 +12,8 @@
 #include <QUuid>
 
 #include "ui_MainWindow.h"
+
+static const char *ccsFileFilter = "Camera Calibration Studio(*.camcalstu)";
 
 namespace ccs::main
 {
@@ -22,11 +25,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	m_ui->setupUi(this);
 
-	m_ui->actionNewProject->setShortcut(QKeySequence::New);
-	m_ui->actionOpenProject->setShortcut(QKeySequence::Open);
+	m_ui->actionNew->setShortcut(QKeySequence::New);
+	m_ui->actionOpen->setShortcut(QKeySequence::Open);
+	m_ui->actionSave->setShortcut(QKeySequence::Save);
 	m_ui->actionQuit->setShortcut(QKeySequence::Quit);
 	m_ui->actionDelete->setShortcut(QKeySequence::Delete);
 
+	connect(m_ui->actionNew, &QAction::triggered, this, &MainWindow::projectNew);
+	connect(m_ui->actionOpen, &QAction::triggered, this, &MainWindow::projectOpen);
+	connect(m_ui->actionSave, &QAction::triggered, this, &MainWindow::projectSave);
+	connect(m_ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
 	connect(m_ui->actionAddCamera, &QAction::triggered, this, &MainWindow::addCamera);
 	connect(m_ui->actionAddPattern, &QAction::triggered, this, &MainWindow::addPattern);
 	connect(m_ui->actionDelete, &QAction::triggered, this, &MainWindow::deleteItems);
@@ -35,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_ui->actionLiveCaptureStopAll, &QAction::triggered, this, &MainWindow::liveCaptureStopAll);
 	connect(m_ui->actionLiveCaptureShoot, &QAction::triggered, this, &MainWindow::liveCaptureShoot);
 	connect(m_ui->actionPrintPattern, &QAction::triggered, this, &MainWindow::printPattern);
+	connect(m_ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
 	connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 
 	connect(m_ui->processTreeDockWidget, &ProjectTreeDockWidget::selectionChanged, this, &MainWindow::projectTreeSelectionChanged);
@@ -50,13 +59,13 @@ MainWindow::~MainWindow()
 	delete m_ui;
 }
 
-bool MainWindow::openProject(const QString &projectFilePath)
+bool MainWindow::openProjectPath(const QString &projectFilePath)
 {
 	QString fileName;
 
 	if (projectFilePath.isEmpty()) // create new
 	{
-		fileName = QFileDialog::getSaveFileName(this, "Create project", QString(), "Camera Calibration Studio(*.camcalstu)");
+		fileName = QFileDialog::getSaveFileName(this, "Create project", QString(), ccsFileFilter);
 		if (fileName.isEmpty())
 			return false;
 
@@ -97,6 +106,69 @@ void MainWindow::projectLoaded(common::Project *newProject)
 
 	m_currentProject = newProject;
 	m_ui->processTreeDockWidget->setProject(newProject);
+
+	if (newProject != nullptr)
+	{
+		connect(newProject, &common::Project::dirtyStateChanged, this, &QMainWindow::setWindowModified);
+		setWindowModified(newProject->isDirtyState());
+	}
+	else
+	{
+		setWindowModified(false);
+	}
+}
+
+bool MainWindow::queryClose()
+{
+	if (m_currentProject->isDirtyState() == false)
+		return true;
+
+	QMessageBox::StandardButton r = QMessageBox::question(this, "Close project",
+		"The project has been modified. Do you want to save your changes or discard them?",
+		QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
+
+	switch (r)
+	{
+		case QMessageBox::Save:
+			return m_currentProject->commit();
+		case QMessageBox::Discard:
+			return true;
+		default: // QMessageBox::Cancel
+			return false;
+	}
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	if (queryClose())
+		event->accept();
+	else
+		event->ignore();
+}
+
+void MainWindow::projectNew()
+{
+	if (!queryClose())
+		return;
+
+	openProjectPath(QString::null);
+}
+
+void MainWindow::projectOpen()
+{
+	if (!queryClose())
+		return;
+
+	QString fileName = QFileDialog::getOpenFileName(this, "Open project", QString(), ccsFileFilter);
+	if (fileName.isEmpty())
+		return;
+
+	openProjectPath(fileName);
+}
+
+void MainWindow::projectSave()
+{
+	m_currentProject->commit();
 }
 
 void MainWindow::projectTreeSelectionChanged()
@@ -268,6 +340,18 @@ void MainWindow::printPattern()
 
 	PrintPatternDialog d(p, this);
 	d.exec();
+}
+
+void MainWindow::about()
+{
+	// NOTE: Use same style as "About Qt"
+
+	QMessageBox::about(this,
+		QApplication::applicationName(),
+		"<h3>About " + QApplication::applicationName() + "</h3>"
+		"<p>" + QApplication::applicationName() + " " + QApplication::applicationVersion() + "</p>"
+		"<p><a href=\"" + QApplication::organizationDomain() + "\">" + QApplication::organizationName() + "</a></p>"
+	);
 }
 
 }

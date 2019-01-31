@@ -18,10 +18,15 @@ class MainWindow : public QMainWindow
 		~MainWindow();
 
 		// projectFilePath.isNull() -> create new project
-		bool openProject(const QString &projectFilePath);
+		bool openProjectPath(const QString &projectFilePath);
 
 	private:
 		void projectLoaded(common::Project *newProject);
+		bool queryClose();
+		void closeEvent(QCloseEvent *event);
+		void projectNew();
+		void projectOpen();
+		void projectSave();
 		void projectTreeSelectionChanged();
 		void projectTreeCurrentItemChanged();
 		void updateLiveCaptureControls();
@@ -33,6 +38,7 @@ class MainWindow : public QMainWindow
 		void addPattern();
 		void deleteItems();
 		void printPattern();
+		void about();
 
 		Ui_MainWindow *m_ui;
 

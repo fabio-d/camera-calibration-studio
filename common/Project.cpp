@@ -3,6 +3,7 @@
 #include "common/Camera.h"
 #include "common/Pattern.h"
 
+#include <QDebug>
 #include <QJsonDocument>
 
 namespace ccs::common
@@ -21,6 +22,8 @@ Project *Project::createOrOpen(const QString &filePath)
 Project::Project(SqliteDatabase *db)
 : m_db(db)
 {
+	connect(m_db, &SqliteDatabase::dirtyStateChanged, this, &Project::dbDirtyStateChanged);
+
 	for (const QSqlRecord &cameraRecord : m_db->exec("SELECT id FROM camera"))
 		m_cameras.insert(new Camera(m_db, cameraRecord.value(0).toInt()));
 
@@ -34,6 +37,22 @@ Project::~Project()
 	qDeleteAll(m_patterns);
 
 	delete m_db;
+}
+
+bool Project::isDirtyState() const
+{
+	return m_db->isDirtyState();
+}
+
+void Project::dbDirtyStateChanged()
+{
+	qCritical() << m_db->isDirtyState();
+	emit dirtyStateChanged(m_db->isDirtyState());
+}
+
+bool Project::commit()
+{
+	m_db->commit();
 }
 
 const QSet<Camera*> &Project::cameras() const

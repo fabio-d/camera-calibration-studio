@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	main::MainWindow mw;
 	mw.show();
 
-	if (!mw.openProject(args.count() == 2 ? args[1] : QString::null))
+	if (!mw.openProjectPath(args.count() == 2 ? args[1] : QString::null))
 	{
 		QMessageBox::critical(&mw, "Error", "Failed to open " + args[1]);
 		return EXIT_FAILURE;

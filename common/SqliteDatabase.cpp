@@ -65,10 +65,14 @@ static void initSchema(SqliteDatabase *db)
 			corner_distance_y DOUBLE
 		)
 	)");
+
+	if (!db->commit())
+		qFatal("Failed to perform initial commit");
 }
 
-SqliteDatabase::SqliteDatabase(const QString &path)
+SqliteDatabase::SqliteDatabase(const QString &path, QObject *parent)
 : m_db(QSqlDatabase::addDatabase("QSQLITE", "ccs_sqlite" + QUuid::createUuid().toString()))
+, m_dirtyState(false)
 {
 	m_db.setDatabaseName(path);
 
@@ -76,6 +80,11 @@ SqliteDatabase::SqliteDatabase(const QString &path)
 	if (m_openOk)
 	{
 		m_db.exec("PRAGMA foreign_keys = ON");
+
+		if (!m_db.transaction())
+			qFatal("Failed to start initial transaction");
+
+		// Ensure that the schema exists
 		initSchema(this);
 	}
 	else
@@ -98,6 +107,28 @@ SqliteDatabase::~SqliteDatabase()
 bool SqliteDatabase::isOpenOk() const
 {
 	return m_openOk;
+}
+
+bool SqliteDatabase::isDirtyState() const
+{
+	return m_dirtyState;
+}
+
+bool SqliteDatabase::commit()
+{
+	if (m_dirtyState)
+	{
+		if (!m_db.commit())
+			return false;
+
+		if (!m_db.transaction())
+			qFatal("Failed to start new transaction after commit");
+
+		m_dirtyState = false;
+		emit dirtyStateChanged();
+	}
+
+	return true;
 }
 
 QList<QSqlRecord> SqliteDatabase::exec(const QString &query, const QVariantList &args)
@@ -145,6 +176,12 @@ QSqlQuery SqliteDatabase::bindAndExec(const QString &query, const QVariantList &
 
 	bool ok = r.exec();
 	Q_ASSERT(ok == true);
+
+	if (!r.isSelect() && !m_dirtyState)
+	{
+		m_dirtyState = true;
+		emit dirtyStateChanged();
+	}
 
 	return r;
 }
