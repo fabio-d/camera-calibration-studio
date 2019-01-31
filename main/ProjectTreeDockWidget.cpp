@@ -94,22 +94,63 @@ ProjectTreeDockWidget::CurrentItem ProjectTreeDockWidget::currentItem() const
 void ProjectTreeDockWidget::updateSensorTree(common::Camera *camera)
 {
 	m_updatingSensorTree = true;
-	m_ui->sensorTreeWidget->clear();
+
+	// Does the new camera have any sensor named like an existing one?
+	QMultiMap<QString, SensorItem*> candidateSensors = m_displayedSensors;
+	QMap<common::Sensor*, SensorItem*> matchingSensors;
+
+	if (camera != nullptr)
+	{
+		for (common::Sensor *s : camera->sensors())
+		{
+			const QString &name = s->staticInfo().name;
+			if (candidateSensors.contains(name))
+				matchingSensors.insert(s, candidateSensors.take(name));
+		}
+	}
+
+	// Delete remaining (i.e. non-matching) sensors
+	qDeleteAll(candidateSensors);
 
 	if (camera == nullptr)
 	{
 		m_ui->sensorTreeWidget->setEnabled(false);
+
+		m_displayedSensors.clear();
 	}
 	else
 	{
 		m_ui->sensorTreeWidget->setEnabled(true);
 
+		m_displayedSensors.clear();
 		for (common::Sensor *s : camera->sensors())
 		{
-			QTreeWidgetItem *sIt = new SensorItem(s);
-			m_ui->sensorTreeWidget->addTopLevelItem(sIt);
-			sIt->setExpanded(true);
+			SensorItem *sIt;
+
+			if (matchingSensors.contains(s))
+			{
+				sIt = matchingSensors[s];
+				sIt->setSensor(s);
+			}
+			else
+			{
+				sIt = new SensorItem(s);
+				m_ui->sensorTreeWidget->addTopLevelItem(sIt);
+			}
+
+			m_displayedSensors.insert(s->staticInfo().name, sIt);
 		}
+	}
+
+	if (m_displayedSensors.size() == 1)
+		m_displayedSensors.first()->setExpanded(true);
+
+	if (m_displayedSensors.size() != 0 && m_ui->sensorTreeWidget->currentItem() == nullptr)
+	{
+		if (m_displayedSensors.first()->childCount() != 0)
+			m_ui->sensorTreeWidget->setCurrentItem(m_displayedSensors.first()->child(0));
+		else
+			m_ui->sensorTreeWidget->setCurrentItem(m_displayedSensors.first());
 	}
 
 	m_updatingSensorTree = false;

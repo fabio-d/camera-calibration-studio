@@ -1,6 +1,6 @@
 #include "main/ProjectTreeItems.h"
 
-// TODO: delete objects
+// TODO: delete and sort objects
 
 namespace ccs::main
 {
@@ -69,6 +69,11 @@ CameraItem::CameraItem(common::Camera *camera)
 
 	connect(m_camera, &common::Camera::shotAdded, this, &CameraItem::shotAdded);
 	connect(m_camera, &common::Camera::shotRemoved, this, &CameraItem::shotRemoved);
+}
+
+CameraItem::~CameraItem()
+{
+	qDeleteAll(m_shotItems);
 }
 
 void CameraItem::addToSelection(ProjectTreeDockWidget::Selection *target) const
@@ -198,9 +203,19 @@ SensorItem::SensorItem(common::Sensor *sensor)
 	setIcon(0, QIcon::fromTheme("preferences-desktop-display-color"));
 	setFlags(flags() & ~Qt::ItemIsSelectable);
 
-	addChild(new SensorImageTypeItem(m_sensor, "Original", common::Sensor::Original));
-	addChild(new SensorImageTypeItem(m_sensor, "Undistorted", common::Sensor::Undistorted));
-	addChild(new SensorImageTypeItem(m_sensor, "Mask", common::Sensor::Mask));
+	addChild(new SensorImageTypeItem(this, "Original", common::Sensor::Original));
+	addChild(new SensorImageTypeItem(this, "Undistorted", common::Sensor::Undistorted));
+	addChild(new SensorImageTypeItem(this, "Mask", common::Sensor::Mask));
+}
+
+SensorItem::~SensorItem()
+{
+	qDeleteAll(takeChildren());
+}
+
+void SensorItem::setSensor(common::Sensor *sensor)
+{
+	m_sensor = sensor;
 }
 
 common::Sensor *SensorItem::sensor() const
@@ -208,9 +223,9 @@ common::Sensor *SensorItem::sensor() const
 	return m_sensor;
 }
 
-SensorImageTypeItem::SensorImageTypeItem(common::Sensor *sensor, const QString &text, common::Sensor::ImageType imageType)
+SensorImageTypeItem::SensorImageTypeItem(SensorItem *parent, const QString &text, common::Sensor::ImageType imageType)
 : BaseSensorItem(text)
-, m_sensor(sensor)
+, m_parent(parent)
 , m_imageType(imageType)
 {
 	setIcon(0, QIcon::fromTheme("image"));
@@ -218,7 +233,7 @@ SensorImageTypeItem::SensorImageTypeItem(common::Sensor *sensor, const QString &
 
 common::Sensor *SensorImageTypeItem::sensor() const
 {
-	return m_sensor;
+	return m_parent->sensor();
 }
 
 common::Sensor::ImageType SensorImageTypeItem::imageType() const

@@ -12,6 +12,7 @@ namespace ccs::main
 
 class CamerasFolderItem;
 class PatternsFolderItem;
+class SensorItem;
 
 class Ui_ProjectTreeDockWidget;
 
@@ -71,6 +72,7 @@ class ProjectTreeDockWidget : public QDockWidget
 		bool m_updatingSensorTree;
 		CamerasFolderItem *m_camerasFolder;
 		PatternsFolderItem *m_patternsFolder;
+		QMultiMap<QString, SensorItem*> m_displayedSensors;
 };
 
 }

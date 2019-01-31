@@ -40,6 +40,7 @@ class CameraItem : public BaseContentsItem
 {
 	public:
 		explicit CameraItem(common::Camera *camera);
+		~CameraItem() override;
 
 		void addToSelection(ProjectTreeDockWidget::Selection *target) const override;
 		void fillCurrentItem(ProjectTreeDockWidget::CurrentItem *target) const override;
@@ -107,7 +108,9 @@ class SensorItem : public BaseSensorItem
 {
 	public:
 		explicit SensorItem(common::Sensor *sensor);
+		~SensorItem() override;
 
+		void setSensor(common::Sensor *sensor);
 		common::Sensor *sensor() const override;
 
 	private:
@@ -117,13 +120,13 @@ class SensorItem : public BaseSensorItem
 class SensorImageTypeItem : public BaseSensorItem
 {
 	public:
-		SensorImageTypeItem(common::Sensor *sensor, const QString &text, common::Sensor::ImageType imageType);
+		SensorImageTypeItem(SensorItem *parent, const QString &text, common::Sensor::ImageType imageType);
 
 		common::Sensor *sensor() const override;
 		common::Sensor::ImageType imageType() const override;
 
 	private:
-		common::Sensor *m_sensor;
+		SensorItem *m_parent;
 		common::Sensor::ImageType m_imageType;
 };
 
