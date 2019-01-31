@@ -12,6 +12,7 @@ class Pattern : public QObject
 	Q_OBJECT
 
 	friend class Project;
+	friend class Shot;
 
 	public:
 		~Pattern();

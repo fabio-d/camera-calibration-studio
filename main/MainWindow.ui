@@ -65,6 +65,8 @@
     </property>
     <addaction name="actionAddPattern"/>
     <addaction name="separator"/>
+    <addaction name="actionDetectPattern"/>
+    <addaction name="separator"/>
     <addaction name="actionPrintPattern"/>
    </widget>
    <addaction name="menu_Project"/>
@@ -308,6 +310,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionDetectPattern"/>
    <addaction name="actionPrintPattern"/>
   </widget>
   <action name="actionNew">
@@ -493,6 +496,17 @@
    </property>
    <property name="iconText">
     <string>Save</string>
+   </property>
+  </action>
+  <action name="actionDetectPattern">
+   <property name="icon">
+    <iconset theme="edit-find"/>
+   </property>
+   <property name="text">
+    <string>Detect Pattern in Selected Image(s)...</string>
+   </property>
+   <property name="iconText">
+    <string>Detect Pattern</string>
    </property>
   </action>
   <zorder>dockWidget_6</zorder>

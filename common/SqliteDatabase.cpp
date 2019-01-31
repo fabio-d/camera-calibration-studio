@@ -44,18 +44,6 @@ static void initSchema(SqliteDatabase *db)
 	)");
 
 	db->exec(R"(
-		CREATE TABLE IF NOT EXISTS sensor_data(
-			id INTEGER PRIMARY KEY,
-			camera_id INTEGER NOT NULL,
-			shot_id INTEGER NOT NULL,
-			sensor_id INTEGER NOT NULL,
-			data BLOB,
-			FOREIGN KEY(shot_id, camera_id) REFERENCES shot(id, camera_id) ON DELETE CASCADE,
-			FOREIGN KEY(sensor_id, camera_id) REFERENCES sensor(id, camera_id) ON DELETE CASCADE
-		)
-	)");
-
-	db->exec(R"(
 		CREATE TABLE IF NOT EXISTS pattern(
 			id INTEGER PRIMARY KEY,
 			name TEXT NOT NULL,
@@ -63,6 +51,21 @@ static void initSchema(SqliteDatabase *db)
 			corner_count_y INTEGER NOT NULL,
 			corner_distance_x DOUBLE,
 			corner_distance_y DOUBLE
+		)
+	)");
+
+	db->exec(R"(
+		CREATE TABLE IF NOT EXISTS sensor_data(
+			id INTEGER PRIMARY KEY,
+			camera_id INTEGER NOT NULL,
+			shot_id INTEGER NOT NULL,
+			sensor_id INTEGER NOT NULL,
+			data BLOB NOT NULL,
+			pattern_id INTEGER,
+			pattern_coordinates BLOB,
+			FOREIGN KEY(shot_id, camera_id) REFERENCES shot(id, camera_id) ON DELETE CASCADE,
+			FOREIGN KEY(sensor_id, camera_id) REFERENCES sensor(id, camera_id) ON DELETE CASCADE,
+			FOREIGN KEY(pattern_id) REFERENCES pattern(id) ON DELETE SET NULL
 		)
 	)");
 
@@ -118,6 +121,9 @@ bool SqliteDatabase::commit()
 {
 	if (m_dirtyState)
 	{
+		// apply constraint
+		exec("UPDATE sensor_data SET pattern_coordinates=NULL WHERE pattern_id is NULL");
+
 		if (!m_db.commit())
 			return false;
 

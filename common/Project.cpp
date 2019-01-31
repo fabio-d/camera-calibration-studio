@@ -25,10 +25,16 @@ Project::Project(SqliteDatabase *db)
 	connect(m_db, &SqliteDatabase::dirtyStateChanged, this, &Project::dbDirtyStateChanged);
 
 	for (const QSqlRecord &cameraRecord : m_db->exec("SELECT id FROM camera"))
-		m_cameras.insert(new Camera(m_db, cameraRecord.value(0).toInt()));
+	{
+		int cameraId = cameraRecord.value(0).toInt();
+		m_cameras.insert(cameraId, new Camera(m_db, this, cameraId));
+	}
 
 	for (const QSqlRecord &patternRecord : m_db->exec("SELECT id FROM pattern"))
-		m_patterns.insert(new Pattern(m_db, patternRecord.value(0).toInt()));
+	{
+		int patternId = patternRecord.value(0).toInt();
+		m_patterns.insert(patternId, new Pattern(m_db, patternId));
+	}
 }
 
 Project::~Project()
@@ -55,24 +61,24 @@ bool Project::commit()
 	m_db->commit();
 }
 
-const QSet<Camera*> &Project::cameras() const
+QList<Camera*> Project::cameras() const
 {
-	return m_cameras;
+	return m_cameras.values();
 }
 
 Camera *Project::addCamera(const QString &cameraName, const CameraStaticInfo &info)
 {
-	int camId = m_db->execInsertId("INSERT INTO camera(name, plugin, plugin_data) VALUES (?, ?, ?)",
+	int cameraId = m_db->execInsertId("INSERT INTO camera(name, plugin, plugin_data) VALUES (?, ?, ?)",
 		{cameraName, info.pluginId, QJsonDocument(info.pluginData).toJson()});
 
 	for (const SensorStaticInfo &s : info.sensors)
 	{
 		m_db->exec("INSERT INTO sensor(camera_id, name, width, height, calibration_parameters) VALUES (?, ?, ?, ?, ?)",
-			{camId, s.name, s.width, s.height, QJsonDocument(QJsonObject()).toJson()});
+			{cameraId, s.name, s.width, s.height, QJsonDocument(QJsonObject()).toJson()});
 	}
 
-	Camera *camera = new Camera(m_db, camId);
-	m_cameras.insert(camera);
+	Camera *camera = new Camera(m_db, this, cameraId);
+	m_cameras.insert(cameraId, camera);
 	emit cameraAdded(camera);
 
 	return camera;
@@ -82,24 +88,24 @@ void Project::removeCamera(Camera *camera)
 {
 	m_db->exec("DELETE FROM camera WHERE id=?", {camera->m_cameraId});
 
-	m_cameras.remove(camera);
+	m_cameras.remove(camera->m_cameraId);
 	emit cameraRemoved(camera);
 
 	delete camera;
 }
 
-const QSet<Pattern*> &Project::patterns() const
+QList<Pattern*> Project::patterns() const
 {
-	return m_patterns;
+	return m_patterns.values();
 }
 
 Pattern *Project::addPattern(const QString &patternName, int cornerCountX, int cornerCountY)
 {
-	int patId = m_db->execInsertId("INSERT INTO pattern(name, corner_count_x, corner_count_y) VALUES (?, ?, ?)",
+	int patternId = m_db->execInsertId("INSERT INTO pattern(name, corner_count_x, corner_count_y) VALUES (?, ?, ?)",
 		{patternName, cornerCountX, cornerCountY});
 
-	Pattern *pattern = new Pattern(m_db, patId);
-	m_patterns.insert(pattern);
+	Pattern *pattern = new Pattern(m_db, patternId);
+	m_patterns.insert(patternId, pattern);
 	emit patternAdded(pattern);
 
 	return pattern;
@@ -109,7 +115,7 @@ void Project::removePattern(Pattern *pattern)
 {
 	m_db->exec("DELETE FROM pattern WHERE id=?", {pattern->m_patternId});
 
-	m_patterns.remove(pattern);
+	m_patterns.remove(pattern->m_patternId);
 	emit patternRemoved(pattern);
 
 	delete pattern;

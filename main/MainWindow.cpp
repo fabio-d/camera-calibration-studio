@@ -2,6 +2,7 @@
 
 #include "main/AddCameraDialog.h"
 #include "main/AddPatternDialog.h"
+#include "main/PatternDetector.h"
 #include "main/PrintPatternDialog.h"
 
 #include <QCloseEvent>
@@ -42,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_ui->actionLiveCaptureStop, &QAction::triggered, this, &MainWindow::liveCaptureStop);
 	connect(m_ui->actionLiveCaptureStopAll, &QAction::triggered, this, &MainWindow::liveCaptureStopAll);
 	connect(m_ui->actionLiveCaptureShoot, &QAction::triggered, this, &MainWindow::liveCaptureShoot);
+	connect(m_ui->actionDetectPattern, &QAction::triggered, this, &MainWindow::detectPattern);
 	connect(m_ui->actionPrintPattern, &QAction::triggered, this, &MainWindow::printPattern);
 	connect(m_ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
 	connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
@@ -190,6 +192,9 @@ void MainWindow::projectTreeSelectionChanged()
 	}
 
 	updateLiveCaptureControls();
+
+	m_ui->actionDetectPattern->setEnabled(!m_ui->processTreeDockWidget->selectedItems().cameras.isEmpty()
+		|| !m_ui->processTreeDockWidget->selectedItems().shots.isEmpty());
 }
 
 void MainWindow::projectTreeCurrentItemChanged()
@@ -331,6 +336,24 @@ void MainWindow::deleteItems()
 
 	for (common::Pattern *p : items.patterns)
 		m_currentProject->removePattern(p);
+
+	// the pattern may have been removed
+	m_ui->centralWidget->updateImage();
+}
+
+void MainWindow::detectPattern()
+{
+	ProjectTreeDockWidget::Selection items = m_ui->processTreeDockWidget->selectedItems();
+
+	QSet<common::Shot*> shots = items.shots;
+	for (common::Camera *c : items.cameras)
+		shots |= c->shots();
+
+	PatternDetector d(shots, m_currentProject->patterns(), this);
+	d.exec();
+
+	// pattern data may have changed
+	m_ui->centralWidget->updateImage();
 }
 
 void MainWindow::printPattern()

@@ -4,6 +4,7 @@ add_executable(ccs
 	CalibrationDataDockWidget.cpp
 	CentralWidget.cpp
 	MainWindow.cpp
+	PatternDetector.cpp
 	PrintPatternDialog.cpp
 	ProjectTreeDockWidget.cpp
 	ProjectTreeItems.cpp

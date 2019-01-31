@@ -4,6 +4,7 @@
 
 #include <QDebug>
 
+#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 namespace ccs::main
@@ -107,6 +108,14 @@ void CentralWidget::updateImage()
 			{
 				assert(m_shot != nullptr);
 				sensorImage = m_shot->sensorData(m_selectedSensor);
+
+				auto tmp = m_shot->patternData(m_selectedSensor);
+				if (tmp.first != nullptr)
+				{
+					cv::Size patternSize(tmp.first->cornerCountX(), tmp.first->cornerCountY());
+					if (!tmp.second.empty())
+						cv::drawChessboardCorners(sensorImage, patternSize, tmp.second, true);
+				}
 			}
 		}
 

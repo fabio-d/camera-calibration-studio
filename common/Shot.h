@@ -8,6 +8,7 @@ namespace ccs::common
 {
 
 class Camera;
+class Pattern;
 
 class Shot : public QObject
 {
@@ -24,10 +25,15 @@ class Shot : public QObject
 		const QJsonObject captureParameters() const;
 		cv::Mat sensorData(const Sensor *sensor) const;
 
+		void setPatternData(const Sensor *sensor, const ccs::common::Pattern *pattern, const std::vector<cv::Point2f> &coordinates);
+		void unsetPatternData(const Sensor *sensor);
+		QPair<const ccs::common::Pattern*, std::vector<cv::Point2f>> patternData(const Sensor *sensor) const;
+
 	private:
 		Shot(SqliteDatabase *db, Camera *camera, int shotId);
 
-		QByteArray sensorDataAsByteArray(const Sensor *sensor) const;
+		bool maybeSensorData(const Sensor *sensor, QByteArray *out_data) const;
+		bool maybePatternData(const Sensor *sensor, int *out_patternId, QString *out_coordinates) const;
 
 		SqliteDatabase *m_db;
 		Camera *m_camera;

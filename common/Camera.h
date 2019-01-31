@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/LiveCapture.h"
+#include "common/Project.h"
 #include "common/Shot.h"
 
 #include <QJsonObject>
@@ -25,6 +26,8 @@ class Camera : public QObject
 	public:
 		~Camera();
 
+		Project *project() const;
+
 		const QString &name() const;
 		const QList<Sensor*> sensors() const;
 
@@ -48,12 +51,13 @@ class Camera : public QObject
 		void shotRemoved(Shot *shot);
 
 	private:
-		Camera(SqliteDatabase *db, int cameraId);
+		Camera(SqliteDatabase *db, Project *project, int cameraId);
 
 		void onFrameCaptured(const QList<cv::Mat> &images);
 		void liveCaptureDestroyed();
 
 		SqliteDatabase *m_db;
+		Project *m_project;
 		int m_cameraId;
 		QString m_name;
 		QList<Sensor*> m_sensors;

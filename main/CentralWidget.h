@@ -24,9 +24,9 @@ class CentralWidget : public QWidget
 		void showShot(common::Shot *shot, common::Sensor *sensor, common::Sensor::ImageType imageType);
 		void showPattern(common::Pattern *pattern);
 
-	private:
 		void updateImage();
 
+	private:
 		Ui_CentralWidget *m_ui;
 
 		common::Sensor::ImageType m_imageType; // Invalid = showNothing

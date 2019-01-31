@@ -9,8 +9,9 @@
 namespace ccs::common
 {
 
-Camera::Camera(SqliteDatabase *db, int cameraId)
+Camera::Camera(SqliteDatabase *db, Project *project, int cameraId)
 : m_db(db)
+, m_project(project)
 , m_cameraId(cameraId)
 , m_liveCapture(nullptr)
 {
@@ -32,6 +33,11 @@ Camera::~Camera()
 	delete m_liveCapture;
 	qDeleteAll(m_shots);
 	qDeleteAll(m_sensors);
+}
+
+Project *Camera::project() const
+{
+	return m_project;
 }
 
 const QString &Camera::name() const

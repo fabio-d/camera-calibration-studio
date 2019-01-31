@@ -4,7 +4,6 @@
 
 #include <QJsonObject>
 #include <QObject>
-#include <QSet>
 
 namespace ccs::common
 {
@@ -17,6 +16,8 @@ class Project : public QObject
 {
 	Q_OBJECT
 
+	friend class Shot;
+
 	public:
 		static Project *createOrOpen(const QString &filePath);
 		~Project();
@@ -24,11 +25,11 @@ class Project : public QObject
 		bool isDirtyState() const;
 		bool commit();
 
-		const QSet<Camera*> &cameras() const;
+		QList<Camera*> cameras() const;
 		Camera *addCamera(const QString &cameraName, const CameraStaticInfo &info);
 		void removeCamera(Camera *camera);
 
-		const QSet<Pattern*> &patterns() const;
+		QList<Pattern*> patterns() const;
 		Pattern *addPattern(const QString &patternName, int cornerCountX, int cornerCountY);
 		void removePattern(Pattern *pattern);
 
@@ -45,8 +46,8 @@ class Project : public QObject
 		void dbDirtyStateChanged();
 
 		SqliteDatabase *m_db;
-		QSet<Camera*> m_cameras;
-		QSet<Pattern*> m_patterns;
+		QMap<int, Camera*> m_cameras;
+		QMap<int, Pattern*> m_patterns;
 };
 
 }
