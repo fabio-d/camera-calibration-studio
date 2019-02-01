@@ -11,6 +11,8 @@ class CameraItem;
 class PatternItem;
 class ShotItem;
 
+void insertOrderedTreeWidgetItem(QTreeWidgetItem *parent, QTreeWidgetItem *newChild);
+
 class BaseContentsItem : public QObject, public QTreeWidgetItem
 {
 	Q_OBJECT

@@ -5,6 +5,20 @@
 namespace ccs::main
 {
 
+void insertOrderedTreeWidgetItem(QTreeWidgetItem *parent, QTreeWidgetItem *newChild)
+{
+	for (int i = 0; i < parent->childCount(); i++)
+	{
+		if (parent->child(i)->text(0).compare(newChild->text(0), Qt::CaseInsensitive) > 0)
+		{
+			parent->insertChild(i, newChild);
+			return;
+		}
+	}
+
+	parent->addChild(newChild);
+}
+
 BaseContentsItem::BaseContentsItem(const QString &text)
 : QTreeWidgetItem(QStringList() << text)
 {
@@ -48,7 +62,7 @@ void CamerasFolderItem::cameraAdded(common::Camera *camera)
 {
 	CameraItem *it = new CameraItem(camera);
 	m_cameraItems.insert(camera, it);
-	addChild(it);
+	insertOrderedTreeWidgetItem(this, it);
 }
 
 void CamerasFolderItem::cameraRemoved(common::Camera *camera)
@@ -99,7 +113,7 @@ void CameraItem::shotAdded(common::Shot *shot)
 {
 	ShotItem *item = new ShotItem(m_camera, shot);
 	m_shotItems.insert(shot, item);
-	addChild(item);
+	insertOrderedTreeWidgetItem(this, item);
 }
 
 void CameraItem::shotRemoved(common::Shot *shot)
@@ -159,7 +173,7 @@ void PatternsFolderItem::patternAdded(common::Pattern *pattern)
 {
 	PatternItem *it = new PatternItem(pattern);
 	m_patternItems.insert(pattern, it);
-	addChild(it);
+	insertOrderedTreeWidgetItem(this, it);
 }
 
 void PatternsFolderItem::patternRemoved(common::Pattern *pattern)

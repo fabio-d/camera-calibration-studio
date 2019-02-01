@@ -135,7 +135,7 @@ void ProjectTreeDockWidget::updateSensorTree(common::Camera *camera)
 			else
 			{
 				sIt = new SensorItem(s);
-				m_ui->sensorTreeWidget->addTopLevelItem(sIt);
+				insertOrderedTreeWidgetItem(m_ui->sensorTreeWidget->invisibleRootItem(), sIt);
 			}
 
 			m_displayedSensors.insert(s->staticInfo().name, sIt);
@@ -152,6 +152,10 @@ void ProjectTreeDockWidget::updateSensorTree(common::Camera *camera)
 		else
 			m_ui->sensorTreeWidget->setCurrentItem(m_displayedSensors.first());
 	}
+
+	QTreeWidgetItem *currentItem = m_ui->sensorTreeWidget->currentItem();
+	if (currentItem != nullptr)
+		m_ui->sensorTreeWidget->scrollToItem(currentItem);
 
 	m_updatingSensorTree = false;
 }
