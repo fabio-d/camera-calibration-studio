@@ -13,8 +13,9 @@ namespace ccs::common
 
 
 
-Sensor::Sensor(SqliteDatabase *db, int sensorId)
+Sensor::Sensor(SqliteDatabase *db, common::Camera *camera, int sensorId)
 : m_db(db)
+, m_camera(camera)
 , m_sensorId(sensorId)
 {
 	QSqlRecord queryCamera = m_db->execReturnOne("SELECT * FROM sensor WHERE id=?", {sensorId});
@@ -29,6 +30,11 @@ Sensor::Sensor(SqliteDatabase *db, int sensorId)
 
 Sensor::~Sensor()
 {
+}
+
+Camera *Sensor::camera() const
+{
+	return m_camera;
 }
 
 const CalibrationParameters &Sensor::calibrationParameters() const

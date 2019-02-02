@@ -5,6 +5,7 @@ add_executable(ccs
 	CentralWidget.cpp
 	MainWindow.cpp
 	PatternDetector.cpp
+	PatternDetectorConfigurationDialog.cpp
 	PrintPatternDialog.cpp
 	ProjectTreeDockWidget.cpp
 	ProjectTreeItems.cpp

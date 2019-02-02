@@ -22,7 +22,7 @@ Camera::Camera(SqliteDatabase *db, Project *project, int cameraId)
 	m_pluginData = QJsonDocument::fromJson(queryCamera.value("plugin_data").toByteArray()).object();
 
 	for (const QSqlRecord &querySensor : m_db->exec("SELECT id FROM sensor WHERE camera_id=?", {cameraId}))
-		m_sensors.append(new Sensor(m_db, querySensor.value(0).toInt()));
+		m_sensors.append(new Sensor(m_db, this, querySensor.value(0).toInt()));
 
 	for (const QSqlRecord &queryShot : m_db->exec("SELECT id FROM shot WHERE camera_id=?", {cameraId}))
 		m_shots.insert(new Shot(m_db, this, queryShot.value(0).toInt()));

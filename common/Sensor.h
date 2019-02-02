@@ -10,6 +10,8 @@
 namespace ccs::common
 {
 
+class Camera;
+
 struct SensorStaticInfo
 {
 	QString name;
@@ -34,6 +36,8 @@ class Sensor : public QObject
 
 		~Sensor();
 
+		Camera *camera() const;
+
 		const CalibrationParameters &calibrationParameters() const;
 		void setCalibrationParameters(const CalibrationParameters &p);
 
@@ -45,9 +49,10 @@ class Sensor : public QObject
 		void calibrationParametersChanged();
 
 	private:
-		Sensor(SqliteDatabase *db, int sensorId);
+		Sensor(SqliteDatabase *db, Camera *camera, int sensorId);
 
 		SqliteDatabase *m_db;
+		Camera *m_camera;
 		int m_sensorId;
 
 		CalibrationParameters m_calibrationParameters;

@@ -3,6 +3,7 @@
 #include "main/AddCameraDialog.h"
 #include "main/AddPatternDialog.h"
 #include "main/PatternDetector.h"
+#include "main/PatternDetectorConfigurationDialog.h"
 #include "main/PrintPatternDialog.h"
 
 #include <QCloseEvent>
@@ -341,6 +342,34 @@ void MainWindow::deleteItems()
 	m_ui->centralWidget->updateImage();
 }
 
+static QList<common::Sensor*> listReferencedSensorsInAlphabeticalOrder(const QSet<common::Shot*> &shots)
+{
+	struct MyPair
+	{
+		common::Camera* camera;
+		common::Sensor* sensor;
+
+		bool operator<(const MyPair &other) const
+		{
+			int cComp = camera->name().compare(other.camera->name(), Qt::CaseInsensitive);
+			if (cComp != 0)
+				return cComp < 0;
+
+			return sensor->staticInfo().name.compare(other.sensor->staticInfo().name, Qt::CaseInsensitive) < 0;
+		}
+	};
+
+	QMap<MyPair, common::Sensor*> cont;
+	for (common::Shot *s : shots)
+	{
+		common::Camera *c = s->camera();
+		for (common::Sensor *s : c->sensors())
+			cont.insert({c, s}, s);
+	}
+
+	return cont.values();
+}
+
 void MainWindow::detectPattern()
 {
 	ProjectTreeDockWidget::Selection items = m_ui->processTreeDockWidget->selectedItems();
@@ -349,8 +378,16 @@ void MainWindow::detectPattern()
 	for (common::Camera *c : items.cameras)
 		shots |= c->shots();
 
-	PatternDetector d(shots, m_currentProject->patterns(), this);
-	d.exec();
+	QList<common::Sensor*> sensors = listReferencedSensorsInAlphabeticalOrder(shots);
+	if (sensors.isEmpty())
+		return;
+
+	PatternDetectorConfigurationDialog d(m_currentProject->patterns(), sensors, this);
+	if (d.exec() != QDialog::Accepted)
+		return;
+
+	PatternDetector w(shots, d.configuration(), this);
+	w.exec();
 
 	// pattern data may have changed
 	m_ui->centralWidget->updateImage();
