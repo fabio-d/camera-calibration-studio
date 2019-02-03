@@ -3,6 +3,8 @@ add_executable(ccs
 	AddPatternDialog.cpp
 	CalibrationDataDockWidget.cpp
 	CentralWidget.cpp
+	CornerRefiner.cpp
+	CornerRefinerConfigurationWidget.cpp
 	MainWindow.cpp
 	PatternDetector.cpp
 	PatternDetectorConfigurationDialog.cpp

@@ -66,6 +66,7 @@
     <addaction name="actionAddPattern"/>
     <addaction name="separator"/>
     <addaction name="actionDetectPattern"/>
+    <addaction name="actionClearPattern"/>
     <addaction name="separator"/>
     <addaction name="actionPrintPattern"/>
    </widget>
@@ -500,13 +501,19 @@
   </action>
   <action name="actionDetectPattern">
    <property name="icon">
-    <iconset theme="edit-find"/>
+    <iconset theme="edit-find">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Detect Pattern in Selected Image(s)...</string>
+    <string>&amp;Detect Pattern in Selected Image(s)...</string>
    </property>
    <property name="iconText">
     <string>Detect Pattern</string>
+   </property>
+  </action>
+  <action name="actionClearPattern">
+   <property name="text">
+    <string>Clear Pattern in Selected Image(s)...</string>
    </property>
   </action>
   <zorder>dockWidget_6</zorder>

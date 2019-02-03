@@ -46,6 +46,9 @@ PatternDetectorConfiguration PatternDetectorConfigurationDialog::configuration()
 	r.pattern = m_patterns[m_ui->patternComboBox->currentIndex()];
 	r.normalizeImage = m_ui->normalizeImageCheckBox->isChecked();
 	r.adaptiveThreshold = m_ui->adaptiveThresholdCheckBox->isChecked();
+	r.filterQuads = m_ui->filterQuadsCheckBox->isChecked();
+	r.fastCheck = m_ui->fastCheckCheckBox->isChecked();
+	r.cornerRefinerConfig = m_ui->cornerRefinerConfigWidget->configuration();
 	r.policy = (PatternDetectorConfiguration::OverwritePolicy)m_ui->policyComboBox->currentData().toInt();
 
 	// Populate r.affectedSensors

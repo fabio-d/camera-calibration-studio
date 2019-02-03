@@ -38,6 +38,7 @@ class MainWindow : public QMainWindow
 		void addPattern();
 		void deleteItems();
 		void detectPattern();
+		void clearPattern();
 		void printPattern();
 		void about();
 

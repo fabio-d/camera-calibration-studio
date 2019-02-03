@@ -23,12 +23,12 @@ class CalibrationDataDockWidget : public QDockWidget
 		void showSensor(common::Sensor *sensor);
 		void showPattern(common::Pattern *pattern);
 
-	protected:
+	private:
 		void applyValues();
 		void dockAreaChanged(Qt::DockWidgetArea area);
 		void updateLayout();
+		void estimateCalibrationParameters();
 
-	private:
 		Ui_CalibrationDataDockWidget *m_ui;
 
 		Qt::DockWidgetArea m_currentDockArea;

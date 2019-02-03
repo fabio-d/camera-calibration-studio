@@ -12,7 +12,7 @@
   </property>
   <widget class="QStackedWidget" name="dockWidgetContents">
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="noParametersPage">
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -63,7 +63,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
+       <y>-85</y>
        <width>764</width>
        <height>585</height>
       </rect>
@@ -637,7 +637,7 @@
          <item row="2" column="2">
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>cy=</string>
+            <string>cy'=</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -650,7 +650,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="label_5">
            <property name="text">
-            <string>cx=</string>
+            <string>cx'=</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -682,7 +682,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>f&amp;y=</string>
+            <string>f&amp;y'=</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -722,7 +722,7 @@
         <item row="3" column="0" colspan="3">
          <widget class="QLabel" name="label_18">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;Help / Show equations...&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#details&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;Help / Show equations...&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textFormat">
            <enum>Qt::RichText</enum>
@@ -772,7 +772,7 @@
          </spacer>
         </item>
         <item row="1" column="1">
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="estimatePushButton">
           <property name="text">
            <string>Estimate...</string>
           </property>
@@ -873,7 +873,7 @@
   <tabstop>finalFyLineEdit</tabstop>
   <tabstop>finalCxLineEdit</tabstop>
   <tabstop>finalCyLineEdit</tabstop>
-  <tabstop>pushButton_2</tabstop>
+  <tabstop>estimatePushButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

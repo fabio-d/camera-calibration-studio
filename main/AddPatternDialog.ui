@@ -17,7 +17,7 @@
    <item row="1" column="1">
     <widget class="QSpinBox" name="cornerCountXSpinBox">
      <property name="minimum">
-      <number>1</number>
+      <number>3</number>
      </property>
      <property name="value">
       <number>7</number>
@@ -37,7 +37,7 @@
    <item row="2" column="1">
     <widget class="QSpinBox" name="cornerCountYSpinBox">
      <property name="minimum">
-      <number>1</number>
+      <number>3</number>
      </property>
      <property name="value">
       <number>5</number>

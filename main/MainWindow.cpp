@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_ui->actionLiveCaptureStopAll, &QAction::triggered, this, &MainWindow::liveCaptureStopAll);
 	connect(m_ui->actionLiveCaptureShoot, &QAction::triggered, this, &MainWindow::liveCaptureShoot);
 	connect(m_ui->actionDetectPattern, &QAction::triggered, this, &MainWindow::detectPattern);
+	connect(m_ui->actionClearPattern, &QAction::triggered, this, &MainWindow::clearPattern);
 	connect(m_ui->actionPrintPattern, &QAction::triggered, this, &MainWindow::printPattern);
 	connect(m_ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
 	connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
@@ -196,6 +197,7 @@ void MainWindow::projectTreeSelectionChanged()
 
 	m_ui->actionDetectPattern->setEnabled(!m_ui->processTreeDockWidget->selectedItems().cameras.isEmpty()
 		|| !m_ui->processTreeDockWidget->selectedItems().shots.isEmpty());
+	m_ui->actionClearPattern->setEnabled(m_ui->actionDetectPattern->isEnabled());
 }
 
 void MainWindow::projectTreeCurrentItemChanged()
@@ -379,7 +381,7 @@ void MainWindow::detectPattern()
 		shots |= c->shots();
 
 	QList<common::Sensor*> sensors = listReferencedSensorsInAlphabeticalOrder(shots);
-	if (sensors.isEmpty())
+	if (sensors.isEmpty() || m_currentProject->patterns().isEmpty())
 		return;
 
 	PatternDetectorConfigurationDialog d(m_currentProject->patterns(), sensors, this);
@@ -388,6 +390,25 @@ void MainWindow::detectPattern()
 
 	PatternDetector w(shots, d.configuration(), this);
 	w.exec();
+
+	// pattern data may have changed
+	m_ui->centralWidget->updateImage();
+}
+
+void MainWindow::clearPattern()
+{
+	ProjectTreeDockWidget::Selection items = m_ui->processTreeDockWidget->selectedItems();
+
+	QSet<common::Shot*> shots = items.shots;
+	for (common::Camera *c : items.cameras)
+		shots |= c->shots();
+
+	for (common::Shot *shot : shots)
+	{
+		common::Camera *c = shot->camera();
+		for (common::Sensor *s : c->sensors())
+			shot->unsetPatternData(s);
+	}
 
 	// pattern data may have changed
 	m_ui->centralWidget->updateImage();
