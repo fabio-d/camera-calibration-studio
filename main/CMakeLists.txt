@@ -1,6 +1,7 @@
 add_executable(ccs
 	AddCameraDialog.cpp
 	AddPatternDialog.cpp
+	CalibrationAlgorithmConfigurationDialog.cpp
 	CalibrationDataDockWidget.cpp
 	CentralWidget.cpp
 	CornerRefiner.cpp
@@ -11,6 +12,7 @@ add_executable(ccs
 	PrintPatternDialog.cpp
 	ProjectTreeDockWidget.cpp
 	ProjectTreeItems.cpp
+	TermCriteriaConfigurationWidget.cpp
 
 	main.cpp
 )

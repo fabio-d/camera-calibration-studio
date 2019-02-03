@@ -28,6 +28,7 @@ void PatternDetector::exec()
 	QProgressDialog progress(m_parent);
 	progress.setLabelText("Detecting pattern...");
 	progress.setWindowModality(Qt::WindowModal);
+	progress.setMinimumDuration(0);
 	progress.setMaximum(m_shots.count());
 
 	CornerRefiner cornerRef(m_config.cornerRefinerConfig);

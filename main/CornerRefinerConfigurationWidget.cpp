@@ -11,9 +11,8 @@ CornerRefinerConfigurationWidget::CornerRefinerConfigurationWidget(QWidget *pare
 {
 	m_ui->setupUi(this);
 
-	QDoubleValidator *v = new QDoubleValidator(this);
-	v->setBottom(0);
-	m_ui->epsilonLineEdit->setValidator(v);
+	m_ui->termCriteriaConfigWidget->setValue(cv::TermCriteria(
+		cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 30, 0.1));
 }
 
 CornerRefinerConfigurationWidget::~CornerRefinerConfigurationWidget()
@@ -30,20 +29,7 @@ CornerRefinerConfiguration CornerRefinerConfigurationWidget::configuration() con
 	r.winSize.height = m_ui->windowSizeHeightSpinBox->value();
 	r.zeroZone.width = m_ui->zeroZoneWidthSpinBox->value();
 	r.zeroZone.height = m_ui->zeroZoneHeightSpinBox->value();
-
-	if (m_ui->epsilonRadioButton->isChecked())
-		r.termCriteria.type = cv::TermCriteria::EPS;
-	else if (m_ui->maxIterationsRadioButton->isChecked())
-		r.termCriteria.type = cv::TermCriteria::MAX_ITER;
-	else
-		r.termCriteria.type = cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS;
-
-	bool ok;
-	r.termCriteria.epsilon = m_ui->epsilonLineEdit->text().toDouble(&ok);
-	if (!ok)
-		r.termCriteria.epsilon = DBL_EPSILON;
-
-	r.termCriteria.maxCount = m_ui->maxIterationsSpinBox->value();
+	r.termCriteria = m_ui->termCriteriaConfigWidget->value();
 
 	return r;
 }

@@ -1,12 +1,17 @@
 #include "main/CalibrationDataDockWidget.h"
 
+#include "main/CalibrationAlgorithmConfigurationDialog.h"
+
 #include "common/Camera.h"
 
 #include <QMessageBox>
+#include <QProgressDialog>
 #include <QScrollBar>
+#include <QThread>
 
 #include <iostream>
 #include <math.h>
+#include <thread>
 
 #include <opencv2/calib3d/calib3d.hpp>
 
@@ -200,11 +205,48 @@ void CalibrationDataDockWidget::estimateCalibrationParameters()
 	}
 
 	cv::Size imageSize(m_sensor->staticInfo().width, m_sensor->staticInfo().height);
-	cv::Mat cameraMatrix(3, 3, CV_64FC1);
-	std::vector<double> distCoeffs;
+
+	common::CalibrationParameters p = m_sensor->calibrationParameters();
+	cv::Mat cameraMatrix = p.cameraMatrix(m_sensor);
+	std::vector<double> distCoeffs = p.distCoeffs(m_sensor);
 	std::vector<cv::Mat> rvec, tvec;
 
-	double error = cv::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distCoeffs, rvec, tvec, CV_CALIB_RATIONAL_MODEL);
+	CalibrationAlgorithmConfigurationDialog d;
+	if (d.exec() != QDialog::Accepted)
+		return;
+
+	int flags = d.calibrateCameraFlags();
+	if (!(flags & cv::CALIB_USE_INTRINSIC_GUESS) && (flags & cv::CALIB_FIX_ASPECT_RATIO))
+	{
+		cameraMatrix.at<double>(0, 0) = d.fixedAspectRatio();
+		cameraMatrix.at<double>(1, 1) = 1;
+	}
+
+	cv::TermCriteria termCriteria = d.termCriteria();
+	double error;
+
+	{
+		QProgressDialog progress("Estimating calibration parameters...", QString::null, 0, 0, this);
+		progress.setWindowModality(Qt::WindowModal);
+		progress.setMinimumDuration(0);
+		progress.setValue(0);
+
+		bool done = false;
+
+		std::thread t([&]()
+		{
+			error = cv::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distCoeffs, rvec, tvec, flags, termCriteria);
+			done = true;
+		});
+
+		while (!done)
+		{
+			QThread::sleep(1);
+			QApplication::processEvents();
+		}
+
+		t.join();
+	}
 
 	m_ui->fxLineEdit->setText(QString::number(cameraMatrix.at<double>(0, 0)));
 	m_ui->fyLineEdit->setText(QString::number(cameraMatrix.at<double>(1, 1)));
@@ -213,18 +255,60 @@ void CalibrationDataDockWidget::estimateCalibrationParameters()
 
 	m_ui->k1LineEdit->setText(QString::number(distCoeffs[0]));
 	m_ui->k2LineEdit->setText(QString::number(distCoeffs[1]));
-	m_ui->p1LineEdit->setText(QString::number(distCoeffs[2]));
-	m_ui->p2LineEdit->setText(QString::number(distCoeffs[3]));
 	m_ui->k3LineEdit->setText(QString::number(distCoeffs[4]));
-	m_ui->k4LineEdit->setText(QString::number(distCoeffs[5]));
-	m_ui->k5LineEdit->setText(QString::number(distCoeffs[6]));
-	m_ui->k6LineEdit->setText(QString::number(distCoeffs[7]));
 
-	//m_ui->k4LineEdit->clear();
-	//m_ui->k5LineEdit->clear();
-	//m_ui->k6LineEdit->clear();
-	m_ui->finalWidthLineEdit->clear();
-	m_ui->finalHeightLineEdit->clear();
+	if ((flags & cv::CALIB_ZERO_TANGENT_DIST))
+	{
+		m_ui->p1LineEdit->clear();
+		m_ui->p2LineEdit->clear();
+	}
+	else
+	{
+		m_ui->p1LineEdit->setText(QString::number(distCoeffs[2]));
+		m_ui->p2LineEdit->setText(QString::number(distCoeffs[3]));
+	}
+
+	if ((flags & cv::CALIB_RATIONAL_MODEL))
+	{
+		m_ui->k4LineEdit->setText(QString::number(distCoeffs[5]));
+		m_ui->k5LineEdit->setText(QString::number(distCoeffs[6]));
+		m_ui->k6LineEdit->setText(QString::number(distCoeffs[7]));
+	}
+	else
+	{
+		m_ui->k4LineEdit->clear();
+		m_ui->k5LineEdit->clear();
+		m_ui->k6LineEdit->clear();
+	}
+
+	if ((flags & cv::CALIB_THIN_PRISM_MODEL))
+	{
+		m_ui->s1LineEdit->setText(QString::number(distCoeffs[8]));
+		m_ui->s2LineEdit->setText(QString::number(distCoeffs[9]));
+		m_ui->s3LineEdit->setText(QString::number(distCoeffs[10]));
+		m_ui->s4LineEdit->setText(QString::number(distCoeffs[11]));
+	}
+	else
+	{
+		m_ui->s1LineEdit->clear();
+		m_ui->s2LineEdit->clear();
+		m_ui->s3LineEdit->clear();
+		m_ui->s4LineEdit->clear();
+	}
+
+	if ((flags & cv::CALIB_TILTED_MODEL))
+	{
+		m_ui->tauXLineEdit->setText(QString::number(distCoeffs[12]));
+		m_ui->tauYLineEdit->setText(QString::number(distCoeffs[13]));
+	}
+	else
+	{
+		m_ui->tauXLineEdit->clear();
+		m_ui->tauYLineEdit->clear();
+	}
+
+	//m_ui->finalWidthLineEdit->clear();
+	//m_ui->finalHeightLineEdit->clear();
 	m_ui->finalFxLineEdit->clear();
 	m_ui->finalFyLineEdit->clear();
 	m_ui->finalCxLineEdit->clear();

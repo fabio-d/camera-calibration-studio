@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ccs::main::CalibrationAlgorithmConfigurationDialog</class>
+ <widget class="QDialog" name="ccs::main::CalibrationAlgorithmConfigurationDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1013</width>
+    <height>839</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Estimate Calibration Parameters</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QCheckBox" name="enableTangentialDistortionCheckBox">
+     <property name="text">
+      <string>Enable tangential distortion (p1, p2)</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="enableRationalModelCheckBox">
+     <property name="text">
+      <string>Enable Rational model for radial distortion (k5, k5, k6)</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="enableThinPrismModelCheckBox">
+     <property name="text">
+      <string>Enable Thin Prism model (s1, s2, s3, s4)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="enableTiltedModelCheckBox">
+     <property name="text">
+      <string>Enable Tilted Lens model (τX, τY)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="noGuessRadioButton">
+     <property name="text">
+      <string>Do no&amp;t use current values</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="2" column="2">
+      <widget class="QCheckBox" name="noGuessFixK2CheckBox">
+       <property name="text">
+        <string>Set k2 to zero</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="2" column="1">
+      <widget class="QCheckBox" name="noGuessFixK1CheckBox">
+       <property name="text">
+        <string>Set k1 to zero</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" colspan="3">
+      <widget class="QCheckBox" name="noGuessFixPrincipalPointCheckBox">
+       <property name="text">
+        <string>Set principal point (cx, cy) to image center</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="noGuessFixK4CheckBox">
+       <property name="text">
+        <string>Set k4 to zero</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QCheckBox" name="noGuessFixK3CheckBox">
+       <property name="text">
+        <string>Set k3 to zero</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="3">
+      <widget class="QCheckBox" name="noGuessFixK6CheckBox">
+       <property name="text">
+        <string>Set k6 to zero</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QCheckBox" name="noGuessFixK5CheckBox">
+       <property name="text">
+        <string>Set k5 to zero</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1" colspan="3">
+      <widget class="QCheckBox" name="noGuessFixS1234CheckBox">
+       <property name="text">
+        <string>Set s1, s2, s3 and s4 to zero</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1" colspan="3">
+      <widget class="QCheckBox" name="noGuessFixTauXYCheckBox">
+       <property name="text">
+        <string>Set τX and τY to zero</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="3">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QCheckBox" name="noGuessFixAspectRatioCheckBox">
+         <property name="text">
+          <string>Set aspect ratio (fx/fy) to</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="xAspectRatioLineEdit">
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="placeholderText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="yAspectRatioLineEdit">
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="placeholderText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="withGuessRadioButton">
+     <property name="text">
+      <string>&amp;Use current values as initial guess</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="2" column="2">
+      <widget class="QCheckBox" name="withGuessFixK2CheckBox">
+       <property name="text">
+        <string>Keep k2 unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="3">
+      <widget class="QCheckBox" name="withGuessFixAspectRatioCheckBox">
+       <property name="text">
+        <string>Keep aspect ratio (fx/fy) unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="2" column="1">
+      <widget class="QCheckBox" name="withGuessFixK1CheckBox">
+       <property name="text">
+        <string>Keep k1 unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" colspan="3">
+      <widget class="QCheckBox" name="withGuessFixPrincipalPointCheckBox">
+       <property name="text">
+        <string>Keep principal point (cx, cy) unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="withGuessFixK4CheckBox">
+       <property name="text">
+        <string>Keep k4 unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QCheckBox" name="withGuessFixK3CheckBox">
+       <property name="text">
+        <string>Keep k3 unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="3">
+      <widget class="QCheckBox" name="withGuessFixK6CheckBox">
+       <property name="text">
+        <string>Keep k6 unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QCheckBox" name="withGuessFixK5CheckBox">
+       <property name="text">
+        <string>Keep k5 unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1" colspan="3">
+      <widget class="QCheckBox" name="withGuessFixS1234CheckBox">
+       <property name="text">
+        <string>Keep s1, s2, s3 and s4 unchanged</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1" colspan="3">
+      <widget class="QCheckBox" name="withGuessFixTauXYCheckBox">
+       <property name="text">
+        <string>Keep τX and τY unchanged</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="ccs::main::TermCriteriaConfigurationWidget" name="termCriteriaConfigWidget" native="true"/>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ccs::main::TermCriteriaConfigurationWidget</class>
+   <extends>QWidget</extends>
+   <header>main/TermCriteriaConfigurationWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>enableTangentialDistortionCheckBox</tabstop>
+  <tabstop>enableRationalModelCheckBox</tabstop>
+  <tabstop>enableThinPrismModelCheckBox</tabstop>
+  <tabstop>enableTiltedModelCheckBox</tabstop>
+  <tabstop>noGuessRadioButton</tabstop>
+  <tabstop>noGuessFixPrincipalPointCheckBox</tabstop>
+  <tabstop>noGuessFixAspectRatioCheckBox</tabstop>
+  <tabstop>xAspectRatioLineEdit</tabstop>
+  <tabstop>yAspectRatioLineEdit</tabstop>
+  <tabstop>noGuessFixK1CheckBox</tabstop>
+  <tabstop>noGuessFixK2CheckBox</tabstop>
+  <tabstop>noGuessFixK3CheckBox</tabstop>
+  <tabstop>noGuessFixK4CheckBox</tabstop>
+  <tabstop>noGuessFixK5CheckBox</tabstop>
+  <tabstop>noGuessFixK6CheckBox</tabstop>
+  <tabstop>noGuessFixS1234CheckBox</tabstop>
+  <tabstop>noGuessFixTauXYCheckBox</tabstop>
+  <tabstop>withGuessRadioButton</tabstop>
+  <tabstop>withGuessFixPrincipalPointCheckBox</tabstop>
+  <tabstop>withGuessFixAspectRatioCheckBox</tabstop>
+  <tabstop>withGuessFixK1CheckBox</tabstop>
+  <tabstop>withGuessFixK2CheckBox</tabstop>
+  <tabstop>withGuessFixK3CheckBox</tabstop>
+  <tabstop>withGuessFixK4CheckBox</tabstop>
+  <tabstop>withGuessFixK5CheckBox</tabstop>
+  <tabstop>withGuessFixK6CheckBox</tabstop>
+  <tabstop>withGuessFixS1234CheckBox</tabstop>
+  <tabstop>withGuessFixTauXYCheckBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ccs::main::CalibrationAlgorithmConfigurationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>ccs::main::CalibrationAlgorithmConfigurationDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

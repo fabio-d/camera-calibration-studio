@@ -124,116 +124,24 @@
     </layout>
    </item>
    <item row="2" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Termination Criteria</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="labelAlignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-      </property>
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="epsilonRadioButton">
-        <property name="text">
-         <string>Epsi&amp;lon only:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="epsilonLineEdit">
-        <property name="text">
-         <string>0.1</string>
-        </property>
-        <property name="placeholderText">
-         <string>DBL_EPSILON</string>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="maxIterationsRadioButton">
-        <property name="text">
-         <string>Ma&amp;x. iterations only:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="maxIterationsSpinBox">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>2000</number>
-        </property>
-        <property name="singleStep">
-         <number>10</number>
-        </property>
-        <property name="value">
-         <number>30</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QRadioButton" name="bothRadioButton">
-        <property name="text">
-         <string>Epsilon and max. i&amp;terations</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+    <widget class="ccs::main::TermCriteriaConfigurationWidget" name="termCriteriaConfigWidget" native="true"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ccs::main::TermCriteriaConfigurationWidget</class>
+   <extends>QWidget</extends>
+   <header>main/TermCriteriaConfigurationWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>windowSizeWidthSpinBox</tabstop>
   <tabstop>windowSizeHeightSpinBox</tabstop>
   <tabstop>zeroZoneWidthSpinBox</tabstop>
   <tabstop>zeroZoneHeightSpinBox</tabstop>
-  <tabstop>epsilonRadioButton</tabstop>
-  <tabstop>epsilonLineEdit</tabstop>
-  <tabstop>maxIterationsRadioButton</tabstop>
-  <tabstop>maxIterationsSpinBox</tabstop>
-  <tabstop>bothRadioButton</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>maxIterationsRadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>epsilonLineEdit</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>225</x>
-     <y>261</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>382</x>
-     <y>219</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>epsilonRadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>maxIterationsSpinBox</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>181</x>
-     <y>208</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>345</x>
-     <y>269</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

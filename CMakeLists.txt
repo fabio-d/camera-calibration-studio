@@ -11,6 +11,9 @@ find_package(Qt5PrintSupport REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Sql REQUIRED)
 
+find_package(Threads)
+link_libraries(${CMAKE_THREAD_LIBS_INIT})
+
 pkg_check_modules(OPENCV3 REQUIRED opencv>=3)
 include_directories(${OPENCV3_INCLUDE_DIRS})
 link_directories(${OPENCV3_LIBRARY_DIRS})

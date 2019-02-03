@@ -29,6 +29,14 @@ static QList<CalibrationParameter::MetaInfo> allFieldsMetaInfo
 	{ "k5", CalibrationParameter::MetaInfo::AnyDouble },
 	{ "k6", CalibrationParameter::MetaInfo::AnyDouble },
 
+	{ "s1", CalibrationParameter::MetaInfo::AnyDouble },
+	{ "s2", CalibrationParameter::MetaInfo::AnyDouble },
+	{ "s3", CalibrationParameter::MetaInfo::AnyDouble },
+	{ "s4", CalibrationParameter::MetaInfo::AnyDouble },
+
+	{ "tauX", CalibrationParameter::MetaInfo::AnyDouble },
+	{ "tauY", CalibrationParameter::MetaInfo::AnyDouble },
+
 	{ "finalHeight", CalibrationParameter::MetaInfo::PositiveInt },
 	{ "finalWidth", CalibrationParameter::MetaInfo::PositiveInt },
 	{ "finalFx", CalibrationParameter::MetaInfo::AnyDouble },
@@ -238,6 +246,12 @@ std::vector<double> CalibrationParameters::distCoeffs(const Sensor *sensor) cons
 	distCoeffs.push_back(readDouble("k4", 0));
 	distCoeffs.push_back(readDouble("k5", 0));
 	distCoeffs.push_back(readDouble("k6", 0));
+	distCoeffs.push_back(readDouble("s1", 0));
+	distCoeffs.push_back(readDouble("s2", 0));
+	distCoeffs.push_back(readDouble("s3", 0));
+	distCoeffs.push_back(readDouble("s4", 0));
+	distCoeffs.push_back(readDouble("tauX", 0));
+	distCoeffs.push_back(readDouble("tauY", 0));
 	return distCoeffs;
 }
 
