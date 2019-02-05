@@ -15,6 +15,8 @@ class LiveCapture : public common::LiveCapture
 		LiveCapture(const QJsonObject &pluginData);
 		~LiveCapture();
 
+		QList<common::BaseLiveCaptureParameter*> parameterList() const override;
+
 	private:
 		bool checkDeviceMatches(const QJsonObject &pluginData);
 		bool configureDevice();
@@ -30,6 +32,7 @@ class LiveCapture : public common::LiveCapture
 
 		cv::Size m_imageSize;
 		QList<void*> m_buffers;
+		QList<common::BaseLiveCaptureParameter*> m_parameters;
 };
 
 }

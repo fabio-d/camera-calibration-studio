@@ -37,6 +37,7 @@ class Camera : public QObject
 		bool isLiveCaptureRunning() const;
 		bool startLiveCapture();
 		void stopLiveCapture();
+		QList<BaseLiveCaptureParameter*> liveCaptureParameterList() const;
 		const QMap<const Sensor*, cv::Mat> &lastCapturedFrame() const;
 
 		Shot *addShot(const QString &name, const QJsonObject &captureParameters, const QMap<const Sensor*, cv::Mat> &frame);
@@ -45,6 +46,7 @@ class Camera : public QObject
 
 	signals:
 		void liveCaptureRunningChanged();
+		void liveCaptureParameterListChanged();
 		void capturedFrameChanged();
 
 		void shotAdded(Shot *shot);

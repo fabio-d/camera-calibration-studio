@@ -1,5 +1,7 @@
 #include "camera_V4L2/LiveCapture.h"
 
+#include "camera_V4L2/LiveCaptureParameters.h"
+
 #include <QDebug>
 #include <QJsonObject>
 
@@ -36,11 +38,28 @@ LiveCapture::LiveCapture(const QJsonObject &pluginData)
 	connect(m_fdMonitor, &QSocketNotifier::activated, this, &LiveCapture::frameCallback);
 
 	streamOn();
+
+	// Enumerate user-settable controls
+	v4l2_queryctrl queryctrl;
+	memset(&queryctrl, 0, sizeof(queryctrl));
+	queryctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
+	while (v4l2_ioctl(m_fd, VIDIOC_QUERYCTRL, &queryctrl) == 0)
+	{
+		common::BaseLiveCaptureParameter *p = createParameterObject(m_fd, queryctrl.id);
+		if (p != nullptr)
+			m_parameters.append(p);
+
+		queryctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+	}
+	if (errno != EINVAL)
+		qCritical() << "Failed to enumerate controls" << nativeDevicePath;
 }
 
 LiveCapture::~LiveCapture()
 {
 	qCritical() << "STOPPING";
+
+	qDeleteAll(m_parameters);
 
 	unmapBuffers();
 
@@ -48,6 +67,11 @@ LiveCapture::~LiveCapture()
 
 	if (m_fd != -1)
 		v4l2_close(m_fd);
+}
+
+QList<common::BaseLiveCaptureParameter*> LiveCapture::parameterList() const
+{
+	return m_parameters;
 }
 
 bool LiveCapture::checkDeviceMatches(const QJsonObject &pluginData)

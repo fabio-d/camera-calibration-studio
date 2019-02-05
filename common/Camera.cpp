@@ -99,10 +99,13 @@ bool Camera::startLiveCapture()
 	// self-delete in case of camera acquisition errors.
 	connect(m_liveCapture, &QObject::destroyed, this, &Camera::liveCaptureDestroyed);
 
-	// New frame callback
+	// Callbacks
 	connect(m_liveCapture, &LiveCapture::frameCaptured, this, &Camera::onFrameCaptured);
+	connect(m_liveCapture, &LiveCapture::parameterListChanged, this, &Camera::liveCaptureParameterListChanged);
 
 	emit liveCaptureRunningChanged();
+	emit liveCaptureParameterListChanged();
+
 	return true;
 }
 
@@ -110,6 +113,14 @@ void Camera::stopLiveCapture()
 {
 	// m_liveCapture will be reset to nullptr by slot liveCaptureDestroyed
 	delete m_liveCapture;
+}
+
+QList<BaseLiveCaptureParameter*> Camera::liveCaptureParameterList() const
+{
+	if (m_liveCapture != nullptr)
+		return m_liveCapture->parameterList();
+	else // no parameters if not running
+		return QList<BaseLiveCaptureParameter*>();
 }
 
 const QMap<const Sensor*, cv::Mat> &Camera::lastCapturedFrame() const
@@ -134,6 +145,7 @@ void Camera::liveCaptureDestroyed()
 	m_liveCapture = nullptr;
 
 	emit liveCaptureRunningChanged();
+	emit liveCaptureParameterListChanged();
 	emit capturedFrameChanged();
 }
 

@@ -209,6 +209,7 @@ void MainWindow::projectTreeCurrentItemChanged()
 		assert(it.sensor == nullptr);
 
 		m_ui->calibrationDataDockWidget->showPattern(it.pattern);
+		m_ui->captureParametersDockWidget->showNothing();
 		m_ui->centralWidget->showPattern(it.pattern);
 	}
 	else if (it.sensor != nullptr)
@@ -218,15 +219,25 @@ void MainWindow::projectTreeCurrentItemChanged()
 		m_ui->calibrationDataDockWidget->showSensor(it.sensor);
 
 		if (it.imageType == common::Sensor::Invalid)
+		{
 			m_ui->centralWidget->showNothing();
+			m_ui->captureParametersDockWidget->showNothing();
+		}
 		else if (it.type == ProjectTreeDockWidget::CurrentItem::Shot)
+		{
 			m_ui->centralWidget->showShot(it.shot, it.sensor, it.imageType);
+			m_ui->captureParametersDockWidget->showNothing();
+		}
 		else
+		{
 			m_ui->centralWidget->showLiveCapture(it.camera, it.sensor, it.imageType);
+			m_ui->captureParametersDockWidget->showLiveCapture(it.camera);
+		}
 	}
 	else
 	{
 		m_ui->calibrationDataDockWidget->showNothing();
+		m_ui->captureParametersDockWidget->showNothing();
 		m_ui->centralWidget->showNothing();
 	}
 
