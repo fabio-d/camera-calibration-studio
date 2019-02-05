@@ -80,7 +80,7 @@ QImage Sensor::renderImage(const cv::Mat &input, ImageType imageType) const
 	}
 
 	QImage img(m.cols, m.rows, QImage::Format_RGB888);
-	cv::Mat qtImg(img.height(), img.width(), CV_8UC3, img.bits());
+	cv::Mat qtImg(img.height(), img.width(), CV_8UC3, img.bits(), img.bytesPerLine());
 	cv::cvtColor(m, qtImg, cv::COLOR_BGR2RGB);
 
 	return img;
