@@ -32,10 +32,13 @@ class CentralWidget : public QWidget
 		void resizeEvent(QResizeEvent *event) override;
 
 		void updateZoom();
+		void drawChessboardCorners(const cv::Size &patternSize, const std::vector<cv::Point2f> &corners);
 
 		Ui_CentralWidget *m_ui;
+
 		QGraphicsScene *m_scene;
 		QGraphicsPixmapItem *m_pixmapItem;
+		QList<QGraphicsPathItem*> m_chessboardPaths;
 
 		common::Sensor::ImageType m_imageType; // Invalid = showNothing
 

@@ -40,6 +40,7 @@ CentralWidget::CentralWidget(QWidget *parent)
 CentralWidget::~CentralWidget()
 {
 	delete m_pixmapItem;
+	qDeleteAll(m_chessboardPaths);
 
 	delete m_ui;
 }
@@ -112,6 +113,9 @@ void CentralWidget::showPattern(common::Pattern *pattern)
 
 void CentralWidget::updateImage()
 {
+	qDeleteAll(m_chessboardPaths);
+	m_chessboardPaths.clear();
+
 	QPixmap pixmap;
 
 	if (m_selectedSensor != nullptr)
@@ -131,12 +135,15 @@ void CentralWidget::updateImage()
 				assert(m_shot != nullptr);
 				sensorImage = m_shot->sensorData(m_selectedSensor);
 
-				auto tmp = m_shot->patternData(m_selectedSensor);
-				if (tmp.first != nullptr)
+				if (m_imageType == common::Sensor::Original)
 				{
-					cv::Size patternSize(tmp.first->cornerCountX(), tmp.first->cornerCountY());
-					if (!tmp.second.empty())
-						cv::drawChessboardCorners(sensorImage, patternSize, tmp.second, true);
+					auto tmp = m_shot->patternData(m_selectedSensor);
+					if (tmp.first != nullptr)
+					{
+						cv::Size patternSize(tmp.first->cornerCountX(), tmp.first->cornerCountY());
+						if (!tmp.second.empty())
+							drawChessboardCorners(patternSize, tmp.second);
+					}
 				}
 			}
 		}
@@ -195,6 +202,50 @@ void CentralWidget::updateZoom()
 			m_ui->graphicsView->fitInView(m_ui->graphicsView->sceneRect(), Qt::KeepAspectRatio);
 		else
 			m_ui->graphicsView->setTransform(QTransform::fromScale(scale, scale));
+	}
+}
+
+// same shape and colors as cv::drawChessboardCorners
+void CentralWidget::drawChessboardCorners(const cv::Size &patternSize, const std::vector<cv::Point2f> &corners)
+{
+	static QVector<QRgb> palette
+	{
+		qRgb(255, 0, 0), qRgb(255, 128, 0), qRgb(200, 200, 0),
+		qRgb(0, 255, 0), qRgb(0, 200, 200), qRgb(0, 0, 255),
+		qRgb(255, 0, 255)
+	};
+
+	QPainterPath marker;
+	marker.moveTo(-4, -4);
+	marker.lineTo(+4, +4);
+	marker.moveTo(-4, +4);
+	marker.lineTo(+4, -4);
+	marker.addEllipse(QPointF(0, 0), 5, 5);
+
+	int i = 0;
+
+	for (int y = 0; y < patternSize.height; y++)
+	{
+		QPainterPath p;
+
+		for (int x = 0; x < patternSize.width; x++)
+		{
+			if (i != 0)
+			{
+				p.moveTo(corners[i-1].x, corners[i-1].y);
+				p.lineTo(corners[i].x, corners[i].y);
+			}
+
+			p.addPath(marker.translated(corners[i].x, corners[i].y));
+
+			i++;
+		}
+
+		QGraphicsPathItem *it = new QGraphicsPathItem(p);
+		it->setPen(QPen(QColor::fromRgb(palette[y % palette.count()]), 0));
+
+		m_scene->addItem(it);
+		m_chessboardPaths << it;
 	}
 }
 
