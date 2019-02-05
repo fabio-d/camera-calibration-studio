@@ -10,11 +10,16 @@ namespace ccs::common
 static QList<CameraPluginMetadata> pluginList;
 static QMap<QString, QPluginLoader*> pluginLoaderMap;
 
+static bool pluginLessThan(const CameraPluginMetadata &a, const CameraPluginMetadata &b)
+{
+	return a.listPriority < b.listPriority;
+}
+
 void CameraPlugin::detectAvailablePlugins(const QString &searchPath)
 {
 	QDir pluginsDir(searchPath);
 
-	for (const QString &fileName : pluginsDir.entryList(QDir::Files))
+	for (const QString &fileName : pluginsDir.entryList(QDir::Files, QDir::Name))
 	{
 		if (!fileName.startsWith("ccscamera_"))
 			continue;
@@ -27,10 +32,13 @@ void CameraPlugin::detectAvailablePlugins(const QString &searchPath)
 		CameraPluginMetadata m;
 		m.pluginId = metadata["id"].toString();
 		m.pluginName = metadata["name"].toString();
+		m.listPriority = metadata["listPriority"].toInt();
 
 		pluginList.append(m);
 		pluginLoaderMap.insert(m.pluginId, loader);
 	}
+
+	qStableSort(pluginList.begin(), pluginList.end(), pluginLessThan);
 }
 
 const QList<CameraPluginMetadata> &CameraPlugin::availablePluginsMetadata()

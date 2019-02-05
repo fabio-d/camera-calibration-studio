@@ -1,4 +1,5 @@
 {
 	"id": "camera_V4L2",
-	"name": "Video4Linux2"
+	"name": "Video4Linux2",
+	"listPriority": 0
 }

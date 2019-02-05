@@ -14,6 +14,7 @@ struct CameraPluginMetadata
 {
 	QString pluginId;
 	QString pluginName;
+	int listPriority;
 };
 
 class CameraPlugin

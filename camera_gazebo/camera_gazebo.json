@@ -1,4 +1,5 @@
 {
 	"id": "camera_gazebo",
-	"name": "Gazebo"
+	"name": "Gazebo",
+	"listPriority": 1
 }
