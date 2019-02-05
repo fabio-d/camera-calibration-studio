@@ -15,6 +15,11 @@
 namespace ccs::camera_V4L2
 {
 
+static bool resGreaterThan(const QSize &a, const QSize &b)
+{
+	return a.width() * a.height() > b.width() * b.height();
+}
+
 AddCameraWidget::AddCameraWidget(QWidget *parent)
 : common::AddCameraWidget(parent)
 , m_ui(new Ui_AddCameraWidget)
@@ -115,6 +120,8 @@ void AddCameraWidget::deviceSelected()
 		m_ui->busInfoLabel->setText(m_busInfoString.constData());
 		m_ui->driverLabel->setText(m_driverString.constData());
 
+		qSort(m_supportedResolutions.begin(), m_supportedResolutions.end(), resGreaterThan);
+
 		for (const QSize &s : m_supportedResolutions)
 		{
 			QString text = QString("%1x%2").arg(s.width()).arg(s.height());
@@ -156,6 +163,8 @@ bool AddCameraWidget::loadDeviceInfo(int fd)
 	memset(&frmsize, 0, sizeof(frmsize));
 	frmsize.pixel_format = V4L2_PIX_FMT_BGR24;
 	frmsize.index = 0;
+
+	m_supportedResolutions.clear();
 
 	while (true)
 	{
