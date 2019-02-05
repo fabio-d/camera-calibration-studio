@@ -299,7 +299,7 @@ void MainWindow::liveCaptureStopAll()
 
 void MainWindow::liveCaptureShoot()
 {
-	QString randomName = "Image" + QUuid::createUuid().toString();
+	QString shotName = m_currentProject->generateUniqueShotName();
 
 	if (m_currentProject != nullptr)
 	{
@@ -309,7 +309,7 @@ void MainWindow::liveCaptureShoot()
 			{
 				QMap<const common::Sensor*, cv::Mat> frame = c->lastCapturedFrame();
 				if (!frame.empty())
-					c->addShot(randomName, {}, frame);
+					c->addShot(shotName, {}, frame);
 			}
 		}
 	}

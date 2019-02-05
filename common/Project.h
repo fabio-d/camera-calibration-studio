@@ -33,6 +33,8 @@ class Project : public QObject
 		Pattern *addPattern(const QString &patternName, int cornerCountX, int cornerCountY);
 		void removePattern(Pattern *pattern);
 
+		QString generateUniqueShotName();
+
 	signals:
 		void dirtyStateChanged(bool dirtyState);
 		void cameraAdded(Camera *camera);

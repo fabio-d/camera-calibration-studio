@@ -69,6 +69,13 @@ static void initSchema(SqliteDatabase *db)
 		)
 	)");
 
+	db->exec(R"(
+		CREATE TABLE IF NOT EXISTS project_metadata(
+			key TEXT PRIMARY KEY,
+			value BLOB
+		)
+	)");
+
 	if (!db->commit())
 		qFatal("Failed to perform initial commit");
 }

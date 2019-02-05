@@ -121,4 +121,24 @@ void Project::removePattern(Pattern *pattern)
 	delete pattern;
 }
 
+QString Project::generateUniqueShotName()
+{
+	int nextValue = 0;
+	QString name;
+
+	for (const QSqlRecord &query : m_db->exec("SELECT value FROM project_metadata WHERE key='image_counter'"))
+	{
+		nextValue = query.value(0).toInt();
+		break;
+	}
+
+	do
+		name = QString("IMG_%1").arg(++nextValue, 5, 10, (QChar)'0');
+	while (m_db->execReturnOne("SELECT ? IN (SELECT name FROM shot)", {name}).value(0).toInt());
+
+	m_db->exec("REPLACE INTO project_metadata(key, value) VALUES('image_counter', ?)", {nextValue});
+
+	return name;
+}
+
 }
