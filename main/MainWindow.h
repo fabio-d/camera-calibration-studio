@@ -42,6 +42,7 @@ class MainWindow : public QMainWindow
 		void clearPattern();
 		void printPattern();
 		void about();
+		void aboutOpenCV();
 
 		Ui_MainWindow *m_ui;
 

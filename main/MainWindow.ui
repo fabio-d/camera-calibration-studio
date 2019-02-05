@@ -44,6 +44,7 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout"/>
+    <addaction name="actionAboutOpenCV"/>
     <addaction name="actionAboutQt"/>
    </widget>
    <widget class="QMenu" name="menu_Live_Capture">
@@ -231,7 +232,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About &amp;CameraCalibrationStudio</string>
+    <string>About</string>
    </property>
    <property name="menuRole">
     <enum>QAction::AboutRole</enum>
@@ -378,6 +379,14 @@
   <action name="actionClearPattern">
    <property name="text">
     <string>&amp;Clear Pattern in Selected Image(s)...</string>
+   </property>
+  </action>
+  <action name="actionAboutOpenCV">
+   <property name="text">
+    <string>About OpenCV</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::AboutRole</enum>
    </property>
   </action>
   <zorder>captureParametersDockWidget</zorder>

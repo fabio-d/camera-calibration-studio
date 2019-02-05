@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
 {
 	QApplication::setApplicationName("Camera Calibration Studio");
 	QApplication::setApplicationVersion("0.1");
-	QApplication::setOrganizationName("University of Catania");
-	QApplication::setOrganizationDomain("arslab.dmi.unict.it");
+	QApplication::setOrganizationName("Department of Mathematics and Computer Science (DMI), University of Catania");
+	QApplication::setOrganizationDomain("dmi.unict.it");
 
 	QApplication app(argc, argv);
 	QStringList args = QApplication::arguments();

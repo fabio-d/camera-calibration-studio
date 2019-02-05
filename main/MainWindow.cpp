@@ -9,6 +9,7 @@
 
 #include <QCloseEvent>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_ui->actionClearPattern, &QAction::triggered, this, &MainWindow::clearPattern);
 	connect(m_ui->actionPrintPattern, &QAction::triggered, this, &MainWindow::printPattern);
 	connect(m_ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
+	connect(m_ui->actionAboutOpenCV, &QAction::triggered, this, &MainWindow::aboutOpenCV);
 	connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 
 	connect(m_ui->processTreeDockWidget, &ProjectTreeDockWidget::selectionChanged, this, &MainWindow::projectTreeSelectionChanged);
@@ -459,6 +461,11 @@ void MainWindow::about()
 		"<p>" + QApplication::applicationName() + " " + QApplication::applicationVersion() + "</p>"
 		"<p><a href=\"" + QApplication::organizationDomain() + "\">" + QApplication::organizationName() + "</a></p>"
 	);
+}
+
+void MainWindow::aboutOpenCV()
+{
+	QDesktopServices::openUrl(QUrl("https://opencv.org/about.html"));
 }
 
 }

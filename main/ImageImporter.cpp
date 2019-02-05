@@ -41,6 +41,8 @@ void ImageImporter::exec()
 				errors << QString("%5: Invalid image size (must be %1x%2, got %3x%4)")
 					.arg(expectedSize.width).arg(expectedSize.height)
 					.arg(image.cols).arg(image.rows).arg(path);
+
+			continue;
 		}
 
 		// Ensure we have a unique name among the shots in the selected camera

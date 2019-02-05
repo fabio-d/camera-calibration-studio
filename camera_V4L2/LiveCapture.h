@@ -2,6 +2,7 @@
 
 #include "common/LiveCapture.h"
 
+#include <QMap>
 #include <QSocketNotifier>
 
 namespace ccs::camera_V4L2
@@ -32,7 +33,9 @@ class LiveCapture : public common::LiveCapture
 
 		cv::Size m_imageSize;
 		QList<void*> m_buffers;
+		QMap<void*, size_t> m_bufferSize;
 		QList<common::BaseLiveCaptureParameter*> m_parameters;
+		int m_bytesPerLine;
 };
 
 }

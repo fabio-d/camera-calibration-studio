@@ -113,6 +113,19 @@ bool LiveCapture::configureDevice()
 	if (v4l2_ioctl(m_fd, VIDIOC_S_FMT, &format) < 0)
 		return false;
 
+	// Check actual video format
+	memset(&format, 0, sizeof(format));
+	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	if (v4l2_ioctl(m_fd, VIDIOC_G_FMT, &format) < 0
+		|| format.fmt.pix.width != m_imageSize.width
+		|| format.fmt.pix.height != m_imageSize.height
+		|| format.fmt.pix.pixelformat != V4L2_PIX_FMT_BGR24)
+	{
+		return false;
+	}
+
+	m_bytesPerLine = format.fmt.pix.bytesperline;
+
 	// Create buffers on device memory
 	v4l2_requestbuffers requestbuffers;
 	memset(&requestbuffers, 0, sizeof(requestbuffers));
@@ -138,10 +151,11 @@ void LiveCapture::mapBuffers()
 		if (v4l2_ioctl(m_fd, VIDIOC_QUERYBUF, &buffer) < 0)
 			qFatal("VIDIOC_QUERYBUF failed");
 
-		if ((unsigned int)buffer.length != (unsigned int)m_imageSize.area() * NUM_CHANNELS)
+		unsigned int expectedLength = m_imageSize.height * m_bytesPerLine;
+		if ((unsigned int)buffer.length < expectedLength)
 		{
-			qFatal("Unexpected buffer length (got %u, expected %u)",
-			     (unsigned int)buffer.length, (unsigned int)m_imageSize.area() * NUM_CHANNELS);
+			qFatal("Buffer is too small (got %u, expected %u)",
+			     (unsigned int)buffer.length, expectedLength);
 		}
 
 		void *b = v4l2_mmap(nullptr, buffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, m_fd, buffer.m.offset);
@@ -152,13 +166,17 @@ void LiveCapture::mapBuffers()
 			qFatal("VIDIOC_QBUF failed, index %d", buffer.index);
 
 		m_buffers.append(b);
+		m_bufferSize.insert(b, buffer.length);
 	}
 }
 
 void LiveCapture::unmapBuffers()
 {
-	for (void *b : m_buffers)
-		v4l2_munmap(b, m_imageSize.area() * NUM_CHANNELS);
+	for (QMap<void*, size_t>::iterator it = m_bufferSize.begin();
+		it != m_bufferSize.end(); ++it)
+	{
+		v4l2_munmap(it.key(), it.value());
+	}
 }
 
 void LiveCapture::streamOn()
@@ -178,7 +196,7 @@ cv::Mat LiveCapture::readNextFrame()
 	if (v4l2_ioctl(m_fd, VIDIOC_DQBUF, &buffer) < 0)
 		return cv::Mat();
 
-	cv::Mat result = cv::Mat(m_imageSize, CV_8UC3, m_buffers[buffer.index]).clone();
+	cv::Mat result = cv::Mat(m_imageSize, CV_8UC3, m_buffers[buffer.index], m_bytesPerLine).clone();
 
         if (v4l2_ioctl(m_fd, VIDIOC_QBUF, &buffer) < 0)
 		return cv::Mat();
