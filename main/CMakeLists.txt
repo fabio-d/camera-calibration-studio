@@ -8,6 +8,7 @@ add_executable(ccs
 	CentralWidget.cpp
 	CornerRefiner.cpp
 	CornerRefinerConfigurationWidget.cpp
+	ImageImporter.cpp
 	MainWindow.cpp
 	PatternDetector.cpp
 	PatternDetectorConfigurationDialog.cpp

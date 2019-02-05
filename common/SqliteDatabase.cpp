@@ -11,6 +11,13 @@ namespace ccs::common
 static void initSchema(SqliteDatabase *db)
 {
 	db->exec(R"(
+		CREATE TABLE IF NOT EXISTS project_metadata(
+			key TEXT PRIMARY KEY,
+			value BLOB -- any type (depending on the key)
+		)
+	)");
+
+	db->exec(R"(
 		CREATE TABLE IF NOT EXISTS camera(
 			id INTEGER PRIMARY KEY,
 			name TEXT NOT NULL,
@@ -66,13 +73,6 @@ static void initSchema(SqliteDatabase *db)
 			FOREIGN KEY(shot_id, camera_id) REFERENCES shot(id, camera_id) ON DELETE CASCADE,
 			FOREIGN KEY(sensor_id, camera_id) REFERENCES sensor(id, camera_id) ON DELETE CASCADE,
 			FOREIGN KEY(pattern_id) REFERENCES pattern(id) ON DELETE SET NULL
-		)
-	)");
-
-	db->exec(R"(
-		CREATE TABLE IF NOT EXISTS project_metadata(
-			key TEXT PRIMARY KEY,
-			value BLOB
 		)
 	)");
 

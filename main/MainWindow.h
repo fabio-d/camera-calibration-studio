@@ -37,6 +37,7 @@ class MainWindow : public QMainWindow
 		void addCamera();
 		void addPattern();
 		void deleteItems();
+		void importImages();
 		void detectPattern();
 		void clearPattern();
 		void printPattern();

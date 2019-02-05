@@ -134,11 +134,25 @@ QString Project::generateUniqueShotName()
 
 	do
 		name = QString("IMG_%1").arg(++nextValue, 5, 10, (QChar)'0');
-	while (m_db->execReturnOne("SELECT ? IN (SELECT name FROM shot)", {name}).value(0).toInt());
+	while (shotNameAlreadyExists(name));
 
 	m_db->exec("REPLACE INTO project_metadata(key, value) VALUES('image_counter', ?)", {nextValue});
 
 	return name;
+}
+
+bool Project::shotNameAlreadyExists(const QString &name, const Camera *restrictSearchToCamera) const
+{
+	if (restrictSearchToCamera != nullptr)
+	{
+		return m_db->execReturnOne("SELECT ? IN (SELECT name FROM shot WHERE camera_id=?)",
+			{name, restrictSearchToCamera->m_cameraId}).value(0).toInt();
+	}
+	else
+	{
+		return m_db->execReturnOne("SELECT ? IN (SELECT name FROM shot)",
+			{name}).value(0).toInt();
+	}
 }
 
 }

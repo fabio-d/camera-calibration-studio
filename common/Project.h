@@ -34,6 +34,7 @@ class Project : public QObject
 		void removePattern(Pattern *pattern);
 
 		QString generateUniqueShotName();
+		bool shotNameAlreadyExists(const QString &name, const Camera *restrictSearchToCamera = nullptr) const;
 
 	signals:
 		void dirtyStateChanged(bool dirtyState);

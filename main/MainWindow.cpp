@@ -2,6 +2,7 @@
 
 #include "main/AddCameraDialog.h"
 #include "main/AddPatternDialog.h"
+#include "main/ImageImporter.h"
 #include "main/PatternDetector.h"
 #include "main/PatternDetectorConfigurationDialog.h"
 #include "main/PrintPatternDialog.h"
@@ -40,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_ui->actionAddCamera, &QAction::triggered, this, &MainWindow::addCamera);
 	connect(m_ui->actionAddPattern, &QAction::triggered, this, &MainWindow::addPattern);
 	connect(m_ui->actionDelete, &QAction::triggered, this, &MainWindow::deleteItems);
+	connect(m_ui->actionImportImages, &QAction::triggered, this, &MainWindow::importImages);
 	connect(m_ui->actionLiveCaptureStart, &QAction::triggered, this, &MainWindow::liveCaptureStart);
 	connect(m_ui->actionLiveCaptureStop, &QAction::triggered, this, &MainWindow::liveCaptureStop);
 	connect(m_ui->actionLiveCaptureStopAll, &QAction::triggered, this, &MainWindow::liveCaptureStopAll);
@@ -211,6 +213,7 @@ void MainWindow::projectTreeCurrentItemChanged()
 		m_ui->calibrationDataDockWidget->showPattern(it.pattern);
 		m_ui->captureParametersDockWidget->showNothing();
 		m_ui->centralWidget->showPattern(it.pattern);
+		m_ui->actionImportImages->setEnabled(false);
 	}
 	else if (it.sensor != nullptr)
 	{
@@ -222,16 +225,19 @@ void MainWindow::projectTreeCurrentItemChanged()
 		{
 			m_ui->centralWidget->showNothing();
 			m_ui->captureParametersDockWidget->showNothing();
+			m_ui->actionImportImages->setEnabled(false);
 		}
 		else if (it.type == ProjectTreeDockWidget::CurrentItem::Shot)
 		{
 			m_ui->centralWidget->showShot(it.shot, it.sensor, it.imageType);
 			m_ui->captureParametersDockWidget->showNothing();
+			m_ui->actionImportImages->setEnabled(false);
 		}
 		else
 		{
 			m_ui->centralWidget->showLiveCapture(it.camera, it.sensor, it.imageType);
 			m_ui->captureParametersDockWidget->showLiveCapture(it.camera);
+			m_ui->actionImportImages->setEnabled(true);
 		}
 	}
 	else
@@ -239,6 +245,7 @@ void MainWindow::projectTreeCurrentItemChanged()
 		m_ui->calibrationDataDockWidget->showNothing();
 		m_ui->captureParametersDockWidget->showNothing();
 		m_ui->centralWidget->showNothing();
+		m_ui->actionImportImages->setEnabled(false);
 	}
 
 	m_ui->actionPrintPattern->setEnabled(it.pattern != nullptr);
@@ -353,6 +360,14 @@ void MainWindow::deleteItems()
 
 	// the pattern may have been removed
 	m_ui->centralWidget->updateImage();
+}
+
+void MainWindow::importImages()
+{
+	ProjectTreeDockWidget::CurrentItem it = m_ui->processTreeDockWidget->currentItem();
+
+	ImageImporter w(it.camera, this);
+	w.exec();
 }
 
 static QList<common::Sensor*> listReferencedSensorsInAlphabeticalOrder(const QSet<common::Shot*> &shots)

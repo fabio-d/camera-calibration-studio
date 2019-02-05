@@ -52,12 +52,12 @@
     </property>
     <addaction name="actionAddCamera"/>
     <addaction name="separator"/>
+    <addaction name="actionImportImages"/>
+    <addaction name="separator"/>
     <addaction name="actionLiveCaptureStart"/>
     <addaction name="actionLiveCaptureStop"/>
     <addaction name="actionLiveCaptureStopAll"/>
     <addaction name="actionLiveCaptureShoot"/>
-    <addaction name="separator"/>
-    <addaction name="action_Import_images"/>
    </widget>
    <widget class="QMenu" name="menuPattern">
     <property name="title">
@@ -265,7 +265,7 @@
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="action_Import_images">
+  <action name="actionImportImages">
    <property name="icon">
     <iconset theme="insert-image">
      <normaloff>../../../../.designer/backup</normaloff>../../../../.designer/backup</iconset>
