@@ -16,11 +16,31 @@ CentralWidget::CentralWidget(QWidget *parent)
 {
 	m_ui->setupUi(this);
 
+	m_scene = new QGraphicsScene(this);
+	m_ui->graphicsView->setScene(m_scene);
+
+	m_pixmapItem = new QGraphicsPixmapItem();
+	m_scene->addItem(m_pixmapItem);
+
+	m_ui->zoomComboBox->addItem("Fit",  QVariant(-1.0));
+	m_ui->zoomComboBox->addItem("10%",  QVariant(0.1));
+	m_ui->zoomComboBox->addItem("20%",  QVariant(0.2));
+	m_ui->zoomComboBox->addItem("50%",  QVariant(0.5));
+	m_ui->zoomComboBox->addItem("100%", QVariant(1.0));
+	m_ui->zoomComboBox->addItem("150%", QVariant(1.5));
+	m_ui->zoomComboBox->addItem("200%", QVariant(2.0));
+	m_ui->zoomComboBox->addItem("300%", QVariant(3.0));
+	m_ui->zoomComboBox->addItem("400%", QVariant(4.0));
+
+	connect(m_ui->zoomComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CentralWidget::updateZoom);
+
 	showNothing();
 }
 
 CentralWidget::~CentralWidget()
 {
+	delete m_pixmapItem;
+
 	delete m_ui;
 }
 
@@ -92,6 +112,8 @@ void CentralWidget::showPattern(common::Pattern *pattern)
 
 void CentralWidget::updateImage()
 {
+	QPixmap pixmap;
+
 	if (m_selectedSensor != nullptr)
 	{
 		assert(m_pattern == nullptr);
@@ -119,10 +141,8 @@ void CentralWidget::updateImage()
 			}
 		}
 
-		if (sensorImage.empty())
-			m_ui->label->setPixmap(QPixmap());
-		else
-			m_ui->label->setPixmap(QPixmap::fromImage(m_selectedSensor->renderImage(sensorImage, m_imageType)));
+		if (!sensorImage.empty())
+			pixmap = QPixmap::fromImage(m_selectedSensor->renderImage(sensorImage, m_imageType));
 	}
 	else if (m_pattern != nullptr)
 	{
@@ -148,11 +168,33 @@ void CentralWidget::updateImage()
 		cv::Mat qtImg(img.height(), img.width(), CV_8UC3, img.bits(), img.bytesPerLine());
 		cv::cvtColor(result, qtImg, cv::COLOR_GRAY2RGB);
 
-		m_ui->label->setPixmap(QPixmap::fromImage(img));
+		pixmap = QPixmap::fromImage(img);
+	}
+
+	m_pixmapItem->setPixmap(pixmap);
+	updateZoom();
+}
+
+void CentralWidget::resizeEvent(QResizeEvent *event)
+{
+	updateZoom();
+}
+
+void CentralWidget::updateZoom()
+{
+	double scale = m_ui->zoomComboBox->currentData().toDouble();
+	if (m_pixmapItem->pixmap().isNull())
+	{
+		m_ui->graphicsView->setSceneRect(0, 0, 1, 1);
+		m_ui->graphicsView->setTransform(QTransform());
 	}
 	else
 	{
-		m_ui->label->setPixmap(QPixmap());
+		m_ui->graphicsView->setSceneRect(m_pixmapItem->boundingRect());
+		if (scale < 0)
+			m_ui->graphicsView->fitInView(m_ui->graphicsView->sceneRect(), Qt::KeepAspectRatio);
+		else
+			m_ui->graphicsView->setTransform(QTransform::fromScale(scale, scale));
 	}
 }
 

@@ -4,6 +4,8 @@
 #include "common/Pattern.h"
 #include "common/Sensor.h"
 
+#include <QGraphicsPixmapItem>
+#include <QGraphicsScene>
 #include <QWidget>
 
 namespace ccs::main
@@ -27,7 +29,13 @@ class CentralWidget : public QWidget
 		void updateImage();
 
 	private:
+		void resizeEvent(QResizeEvent *event) override;
+
+		void updateZoom();
+
 		Ui_CentralWidget *m_ui;
+		QGraphicsScene *m_scene;
+		QGraphicsPixmapItem *m_pixmapItem;
 
 		common::Sensor::ImageType m_imageType; // Invalid = showNothing
 
