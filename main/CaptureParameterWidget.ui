@@ -99,7 +99,7 @@
       <string>Restore default value</string>
      </property>
      <property name="icon">
-      <iconset theme="kt-restore-defaults">
+      <iconset theme="edit-clear">
        <normaloff>.</normaloff>.</iconset>
      </property>
      <property name="autoRaise">
