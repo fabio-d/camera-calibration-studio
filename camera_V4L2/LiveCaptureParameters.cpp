@@ -10,6 +10,9 @@
 namespace ccs::camera_V4L2
 {
 
+QStringList BooleanLiveCaptureParameter::options =
+	QStringList() << "Disabled" << "Enabled";
+
 static v4l2_queryctrl queryCtrl(int fd, uint32_t controlId)
 {
 	v4l2_queryctrl r;
@@ -105,6 +108,10 @@ common::BaseLiveCaptureParameter *createParameterObject(int fd, uint32_t control
 		else
 			return new MenuLiveCaptureParameter(fd, controlId, choices);
 	}
+	else if (queryctrl.type == V4L2_CTRL_TYPE_BOOLEAN)
+	{
+		return new BooleanLiveCaptureParameter(fd, controlId);
+	}
 	else
 	{
 		qCritical() << "Unsupported control type" << queryctrl.type << "for" << queryctrl.name;
@@ -195,6 +202,38 @@ int MenuLiveCaptureParameter::currentChoice() const
 int MenuLiveCaptureParameter::defaultChoice() const
 {
 	return m_indexMap.indexOf(queryCtrl(m_fd, m_controlId).default_value);
+}
+
+BooleanLiveCaptureParameter::BooleanLiveCaptureParameter(int fd, uint32_t controlId)
+: common::SingleChoiceLiveCaptureParameter((const char*)queryCtrl(fd, controlId).name, options)
+, m_fd(fd)
+, m_controlId(controlId)
+{
+}
+
+bool BooleanLiveCaptureParameter::canBeRead() const
+{
+	return camera_V4L2::canBeRead(m_fd, m_controlId);
+}
+
+bool BooleanLiveCaptureParameter::canBeWritten() const
+{
+	return camera_V4L2::canBeWritten(m_fd, m_controlId);
+}
+
+void BooleanLiveCaptureParameter::setCurrentChoice(int index)
+{
+	setCtrl(m_fd, m_controlId, index);
+}
+
+int BooleanLiveCaptureParameter::currentChoice() const
+{
+	return getCtrl(m_fd, m_controlId);
+}
+
+int BooleanLiveCaptureParameter::defaultChoice() const
+{
+	return queryCtrl(m_fd, m_controlId).default_value;
 }
 
 }

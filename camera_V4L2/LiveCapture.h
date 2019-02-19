@@ -25,7 +25,8 @@ class LiveCapture : public common::LiveCapture
 		void unmapBuffers();
 		void streamOn();
 
-		cv::Mat readNextFrame();
+		bool dequeueNextEvent();
+		bool dequeueNextFrame();
 		void frameCallback();
 
 		int m_fd;
@@ -34,7 +35,7 @@ class LiveCapture : public common::LiveCapture
 		cv::Size m_imageSize;
 		QList<void*> m_buffers;
 		QMap<void*, size_t> m_bufferSize;
-		QList<common::BaseLiveCaptureParameter*> m_parameters;
+		QMap<uint32_t, common::BaseLiveCaptureParameter*> m_parameters;
 		int m_bytesPerLine;
 };
 

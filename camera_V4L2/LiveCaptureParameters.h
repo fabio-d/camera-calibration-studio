@@ -52,4 +52,25 @@ class MenuLiveCaptureParameter : public common::SingleChoiceLiveCaptureParameter
 		QList<int> m_indexMap;
 };
 
+class BooleanLiveCaptureParameter : public common::SingleChoiceLiveCaptureParameter
+{
+	public:
+		BooleanLiveCaptureParameter(int fd, uint32_t controlId);
+
+		// common::BaseLiveCaptureParameter
+		bool canBeRead() const override;
+		bool canBeWritten() const override;
+
+		// common::SingleChoiceLiveCaptureParameter
+		void setCurrentChoice(int index) override;
+		int currentChoice() const override;
+		int defaultChoice() const override;
+
+	private:
+		static QStringList options;
+
+		int m_fd;
+		uint32_t m_controlId;
+};
+
 }

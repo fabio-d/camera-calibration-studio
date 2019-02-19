@@ -23,7 +23,7 @@ LiveCapture::LiveCapture(const QJsonObject &pluginData)
 	m_imageSize.width = pluginData.value("width").toInt();
 	m_imageSize.height = pluginData.value("height").toInt();
 
-	m_fd = v4l2_open(nativeDevicePath.constData(), O_RDWR);
+	m_fd = v4l2_open(nativeDevicePath.constData(), O_RDWR | O_NONBLOCK);
 	if (m_fd == -1 || !checkDeviceMatches(pluginData) || !configureDevice())
 	{
 		qCritical() << "Failed to open, verify or configure" << nativeDevicePath;
@@ -47,7 +47,17 @@ LiveCapture::LiveCapture(const QJsonObject &pluginData)
 	{
 		common::BaseLiveCaptureParameter *p = createParameterObject(m_fd, queryctrl.id);
 		if (p != nullptr)
-			m_parameters.append(p);
+		{
+			m_parameters.insert(queryctrl.id, p);
+
+			v4l2_event_subscription event_subscription;
+			memset(&event_subscription, 0, sizeof(event_subscription));
+			event_subscription.type = V4L2_EVENT_CTRL;
+			event_subscription.id = queryctrl.id;
+
+			if (v4l2_ioctl(m_fd, VIDIOC_SUBSCRIBE_EVENT, &event_subscription) < 0)
+				qCritical() << "Failed to subscribe event" << queryctrl.id;
+		}
 
 		queryctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
 	}
@@ -71,7 +81,7 @@ LiveCapture::~LiveCapture()
 
 QList<common::BaseLiveCaptureParameter*> LiveCapture::parameterList() const
 {
-	return m_parameters;
+	return m_parameters.values();
 }
 
 bool LiveCapture::checkDeviceMatches(const QJsonObject &pluginData)
@@ -187,35 +197,52 @@ void LiveCapture::streamOn()
 		qFatal("VIDIOC_STREAMON");
 }
 
-cv::Mat LiveCapture::readNextFrame()
+bool LiveCapture::dequeueNextEvent()
+{
+	v4l2_event event;
+	memset(&event, 0, sizeof(event));
+	if (v4l2_ioctl(m_fd, VIDIOC_DQEVENT, &event) < 0)
+		return false;
+
+	if (event.type == V4L2_EVENT_CTRL)
+	{
+		common::BaseLiveCaptureParameter *p = m_parameters.value(event.id, nullptr);
+		if (p != nullptr)
+			emit p->somethingChanged();
+	}
+
+	return true;
+}
+
+bool LiveCapture::dequeueNextFrame()
 {
 	v4l2_buffer buffer;
 	memset(&buffer, 0, sizeof(buffer));
 	buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	buffer.memory = V4L2_MEMORY_MMAP;
 	if (v4l2_ioctl(m_fd, VIDIOC_DQBUF, &buffer) < 0)
-		return cv::Mat();
+		return false;
 
 	cv::Mat result = cv::Mat(m_imageSize, CV_8UC3, m_buffers[buffer.index], m_bytesPerLine).clone();
 
         if (v4l2_ioctl(m_fd, VIDIOC_QBUF, &buffer) < 0)
-		return cv::Mat();
+		return false;
 
-	return result;
+	//qCritical() << "FRAME";
+	emit frameCaptured(QList<cv::Mat>() << result);
+
+	return true;
 }
 
 void LiveCapture::frameCallback()
 {
-	cv::Mat frame = readNextFrame();
-	if (frame.empty())
+	bool gotEvent = dequeueNextEvent();
+	bool gotFrame = dequeueNextFrame();
+
+	if (!gotEvent && !gotFrame)
 	{
 		qCritical() << "Read error";
 		deleteLater();
-	}
-	else
-	{
-		//qCritical() << "FRAME";
-		emit frameCaptured(QList<cv::Mat>() << frame);
 	}
 }
 
