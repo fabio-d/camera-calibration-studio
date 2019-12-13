@@ -1,5 +1,6 @@
 #include "main/CalibrationAlgorithmConfigurationDialog.h"
 
+#include <QDoubleValidator>
 #include <QPushButton>
 
 #include <opencv2/calib3d/calib3d.hpp>
