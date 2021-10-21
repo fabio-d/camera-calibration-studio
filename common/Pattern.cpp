@@ -12,8 +12,8 @@ Pattern::Pattern(SqliteDatabase *db, int patternId)
 	m_name = queryPattern.value("name").toString();
 	m_cornerCountX = queryPattern.value("corner_count_x").toInt();
 	m_cornerCountY = queryPattern.value("corner_count_y").toInt();
-	m_cornerDistanceX = queryPattern.value("corner_distance_x").toInt();
-	m_cornerDistanceY = queryPattern.value("corner_distance_y").toInt();
+	m_cornerDistanceX = queryPattern.value("corner_distance_x").toDouble();
+	m_cornerDistanceY = queryPattern.value("corner_distance_y").toDouble();
 }
 
 Pattern::~Pattern()
